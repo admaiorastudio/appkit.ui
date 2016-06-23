@@ -2,14 +2,16 @@
 <package >
   <metadata>
     <id>AdMaiora.AppKit.UI</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 	<title>AdMaiora UI AppKit for Xamarin (PCL)</title>
-    <authors>AdMaiora</authors>
-    <owners>AdMaiora</owners>
+    <authors>Ad Maiora Studio</authors>
+    <owners>Ad Maiora Studio</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>AdMaiora UI SDK NuGet</description>
-    <releaseNotes>First release.</releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <description>App accelerator pack to bring common UI functionality easy with Xamarin</description>
+    <releaseNotes>First release</releaseNotes>
+    <copyright>Copyright Ad Maiora Studio ©  2016</copyright>
+	<projectUrl>https://github.com/admaiorastudio/appkit.ui</projectUrl>
+	<iconUrl>http://www.admaiorastudio.com/img/logo.png</iconUrl>
     <tags>AdMaiora AppKit UI pcl Xamarin</tags>
     <dependencies>
     </dependencies>
