@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>AdMaiora.AppKit.UI</id>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 	<title>AdMaiora UI AppKit for Xamarin (PCL)</title>
     <authors>Ad Maiora Studio</authors>
     <owners>Ad Maiora Studio</owners>

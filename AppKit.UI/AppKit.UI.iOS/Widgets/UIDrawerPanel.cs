@@ -17,8 +17,10 @@
 
         private UIView _overlay;
 
-        private bool _isAtLeft;
+        private bool _isAtLeft = true;
 		protected bool _draggable;
+
+        private nfloat _boundRight;
 
         #endregion
 
@@ -73,14 +75,27 @@
 
 		public bool Draggable
 		{
-			get{ return _draggable; }
-			set{ _draggable = value; }
+			get
+            {
+                return _draggable;
+            }
+			set
+            {
+                _draggable = value;
+            }
 		}
 
         public bool IsAtLeft
         {
-            get { return _isAtLeft; }
-            set { _isAtLeft = value; }
+            get
+            {
+                return _isAtLeft;
+            }
+            set
+            {
+                _isAtLeft = value;
+                LayoutSubviews();
+            }
         }
 
         #endregion
@@ -89,37 +104,23 @@
 
         public override void LayoutSubviews()
         {
+            // This has been commented
+            // to prevent UI constraints to broke layouting
             base.LayoutSubviews();
-
-            var frame = this.Frame;
-			frame.X = _isAtLeft ? -frame.Width : 320;
-            this.Frame = frame;
-
-            this.Hidden = true;
-
-            _overlay.Frame = this.Superview.Bounds;
-            _overlay.AddGestureRecognizer(new UITapGestureRecognizer(() => CloseDrawer()));
-
-            this.Superview.InsertSubviewBelow(_overlay, this);
-            this.Superview.AddGestureRecognizer(new UIPanGestureRecognizer(DragContentView));
         }
-
+                    
         public void OpenDrawer()
         {
             _overlay.Hidden = false;
             _overlay.Alpha = _isOpened ? .8f : 0f;
             _overlay.UserInteractionEnabled = true;
 
-            InvokeOnMainThread(() =>
-            {
-                this.Hidden = false;
-                UIView.Animate(.2f, 
+            this.Hidden = false;
+            UIView.Animate(.2f,
                 () =>
                 {
-                    UIView.SetAnimationCurve(UIViewAnimationCurve.EaseIn);
-
                     var frame = this.Frame;
-					frame.X = _isAtLeft ? 0 : 320 - frame.Width;
+                    frame.X = _isAtLeft ? 0 : _boundRight - frame.Width;
                     this.Frame = frame;
 
                     _overlay.Alpha = .8f;
@@ -128,25 +129,22 @@
                 {
                     _isOpened = true;
 
-                    OnDrawerOpened();                   
+                    OnDrawerOpened();
                 });
-            });
         }
 
         public void CloseDrawer()
         {
             _overlay.UserInteractionEnabled = false;
 
-            InvokeOnMainThread(() =>
-            {
-                this.Hidden = false;
-                UIView.Animate(.2f, 
+            this.Hidden = false;
+            UIView.Animate(.2f,
                 () =>
                 {
                     UIView.SetAnimationCurve(UIViewAnimationCurve.EaseIn);
 
                     var frame = this.Frame;
-					frame.X = _isAtLeft ? -frame.Width : 320;
+                    frame.X = _isAtLeft ? -frame.Width : _boundRight;
                     this.Frame = frame;
 
                     _overlay.Alpha = 0f;
@@ -161,7 +159,6 @@
 
                     OnDrawerClosed();
                 });
-            });
         }
 
         public void ToggleDrawer()
@@ -198,6 +195,8 @@
             
         private void Initialize()
         {
+            _boundRight = UIScreen.MainScreen.Bounds.Right;
+
             _isOpened = false;
 
             _overlay = new UIView();
@@ -205,6 +204,20 @@
             _overlay.Alpha = 0f;
             _overlay.Hidden = true;
             _overlay.UserInteractionEnabled = false;
+            _overlay.AddGestureRecognizer(new UITapGestureRecognizer(() => CloseDrawer()));
+            _overlay.Frame = UIScreen.MainScreen.Bounds;
+
+            this.TranslatesAutoresizingMaskIntoConstraints = true;
+            var frame = this.Frame;
+            frame.X = _isAtLeft ? -frame.Width : _boundRight;
+            frame.Y = 0;
+            frame.Height = UIScreen.MainScreen.Bounds.Height;
+            this.Frame = frame;
+
+            this.Hidden = true;            
+
+            this.Superview.InsertSubviewBelow(_overlay, this);
+            this.Superview.AddGestureRecognizer(new UIPanGestureRecognizer(DragContentView));
 
             this.ClipsToBounds = true;
         }
@@ -238,10 +251,10 @@
 				}
 				else
 				{
-					if (frame.X > 320)
-						frame.X = 320;
-					if (frame.X < 320 -frame.Width)
-						frame.X = 320 -frame.Width;
+					if (frame.X > _boundRight)
+						frame.X = _boundRight;
+					if (frame.X < _boundRight - frame.Width)
+						frame.X = _boundRight - frame.Width;
 				}
 
                 this.Frame = frame;
@@ -252,12 +265,16 @@
                 nfloat newX = translation + _startX;
 
 				bool show;
-				if (_isAtLeft)
-					show = this.Frame.X > -(this.Frame.Width * .5f)
-					|| Math.Abs(velocity) > 1000 ? velocity > 0 : newX > (menuWidth / 2);
-				else
-					show = !( this.Frame.X < 320
-						|| Math.Abs(velocity) > 1000 ? velocity > 0 : newX < (320 - (menuWidth / 2)));
+                if (_isAtLeft)
+                {
+                    show = this.Frame.X > -(this.Frame.Width * .5f)
+                        || Math.Abs(velocity) > 1000 ? velocity > 0 : newX > (menuWidth / 2);
+                }
+                else
+                {
+                    show = !(this.Frame.X < _boundRight
+                        || Math.Abs(velocity) > 1000 ? velocity > 0 : newX < (_boundRight - (menuWidth / 2)));
+                }
 
                 if (show) 
                 {

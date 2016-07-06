@@ -46,6 +46,7 @@
     <Compile Include="Extensions\UIAlertViewExtension.cs" />
     <Compile Include="Extensions\UIBarButtonItemExtension.cs" />
     <Compile Include="Extensions\UILabelExtension.cs" />
+    <Compile Include="Extensions\UIViewControllerExtension.cs" />
     <Compile Include="Extensions\UINavigationControllerExtension.cs" />
     <Compile Include="Extensions\UINavigationItem.cs" />
     <Compile Include="Extensions\UIPickerViewExtension.cs" />
