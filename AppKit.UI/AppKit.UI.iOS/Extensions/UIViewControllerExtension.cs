@@ -46,7 +46,7 @@
                         bool hasNavigationBar = c.NavigationController != null 
                             && c.NavigationController.NavigationBarHidden == false;
 
-                        CGRect responderFrame = view.ConvertRectFromView(responder.Frame, responder);
+                        CGRect responderFrame = view.ConvertRectFromView(responder.Frame, responder.Superview);
 
                         // Animate in case
 
@@ -57,42 +57,54 @@
                         UIViewAnimationCurve animationCurve = (UIViewAnimationCurve)((NSNumber)notification.UserInfo[UIKeyboard.AnimationCurveUserInfoKey]).Int32Value;
                         int animationDuration = ((NSNumber)notification.UserInfo[UIKeyboard.AnimationDurationUserInfoKey]).Int32Value;
 
-                        // Get Available height
-                        nfloat availableHeight = windowRect.Height - keyboardEndFrame.Height;
-
                         // Check if the final keyboard frame is outside the windows
                         // This means that the keyboard is going to be hidden
                         bool isShowing = keyboardEndFrame.Y < windowRect.Bottom;
                         // Get direction as -1 is up and 1 is down
                         int direction = isShowing ? -1 : 1; //keyboardEndFrame.Y <= keyboardBeginFrame.Y ? -1 : 1;
 
-                        // Calculate view offset                    
-                        nfloat offset = (isShowing ? (keyboardEndFrame.Height * direction) : 0);
-
                         // Calculate navbar offset
                         nfloat navbarOffset = (hasNavigationBar ? 64f : 0f);
 
+                        // Get Available height
+                        nfloat availableHeight = windowRect.Height - (navbarOffset + keyboardEndFrame.Height);
+
                         // Calculate responder offset
-                        nfloat responderOffset =
-                            isShowing && ((offset + responder.Frame.Y) < navbarOffset + 4f) ? (navbarOffset - (offset + responder.Frame.Y)) + 4f : 0;
+                        //nfloat responderOffset =
+                        //    isShowing && ((responderFrame.Y - offset) < navbarOffset + 4f) ? (navbarOffset - (offset + responder.Frame.Y)) + 4f : 0;
 
-                        // Do not slide up if not necessary
-                        if (isShowing
-                            && (responderFrame.Y + responderFrame.Height) <= availableHeight)
-                        {
-                            offset = 0;
-                            responderOffset = 0;
+                        // Calculate view offset                    
+                        nfloat offset = 0; // (isShowing ? (keyboardEndFrame.Height * direction) : 0);
+                        if (isShowing)
+                        { 
+                            if((responderFrame.Y + responderFrame.Height) <= availableHeight)
+                            {
+                                offset = navbarOffset;
+                                //responderOffset = 0;
 
-                            if (view.Frame.Y == navbarOffset)
-                                return;
+                                if (view.Frame.Y == navbarOffset)
+                                    return;
+                            }
+                            else
+                            {
+                                // k is the distance between the top of the keyboard frame and the top of the widget
+                                nfloat k = responderFrame.Top - keyboardEndFrame.Top;
+                                // offset is calculated to bring the widget over the keyboard with a small padding (p)
+                                nfloat p = 4;
+                                offset = -(k + responderFrame.Height + p);
+                            }
                         }
-
+                        else
+                        {
+                            offset = navbarOffset;
+                        }
+                        
                         UIView.BeginAnimations(null);
                         UIView.SetAnimationBeginsFromCurrentState(true);
                         UIView.SetAnimationDuration(animationDuration * 0.95);
                         UIView.SetAnimationCurve(animationCurve);
                         CGRect newFrame = view.Frame;
-                        newFrame.Y = offset + navbarOffset + responderOffset;
+                        newFrame.Y = offset; //offset + navbarOffset + responderOffset;
                         view.Frame = newFrame;
                         UIView.CommitAnimations();
                     }

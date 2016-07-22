@@ -45,6 +45,7 @@
     <Compile Include="Extensions\NSObjectExtension.cs" />
     <Compile Include="Extensions\UIAlertViewExtension.cs" />
     <Compile Include="Extensions\UIBarButtonItemExtension.cs" />
+    <Compile Include="Extensions\UIButtonExtension.cs" />
     <Compile Include="Extensions\UILabelExtension.cs" />
     <Compile Include="Extensions\UIViewControllerExtension.cs" />
     <Compile Include="Extensions\UINavigationControllerExtension.cs" />
