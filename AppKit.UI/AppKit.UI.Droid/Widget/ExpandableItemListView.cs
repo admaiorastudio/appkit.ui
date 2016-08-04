@@ -51,6 +51,13 @@ namespace AdMaiora.AppKit.UI
 
         #region Public Methods
 
+        public void ReloadData()
+        {
+            var adapter = this.Adapter as BaseExpandableListAdapter;
+            if (adapter != null)
+                adapter.NotifyDataSetChanged();
+        }
+
         public void SelectItem(int index, object item)
         {
             OnItemSelected(index, item);

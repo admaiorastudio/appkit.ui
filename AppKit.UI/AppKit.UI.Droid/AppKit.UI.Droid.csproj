@@ -16,6 +16,8 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
     <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,10 +43,32 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <Reference Include="Xamarin.Android.Support.Animated.Vector.Drawable, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Animated.Vector.Drawable.23.4.0.1\lib\MonoAndroid403\Xamarin.Android.Support.Animated.Vector.Drawable.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.v4, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.v4.23.4.0.1\lib\MonoAndroid403\Xamarin.Android.Support.v4.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.v7.AppCompat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.v7.AppCompat.23.4.0.1\lib\MonoAndroid403\Xamarin.Android.Support.v7.AppCompat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.Vector.Drawable, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\lib\MonoAndroid403\Xamarin.Android.Support.Vector.Drawable.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Adapters\ExpandableItemListAdapter.cs" />
     <Compile Include="Adapters\ItemListAdapter.cs" />
+    <Compile Include="Extensions\SupportActivityExtension.cs" />
+    <Compile Include="Extensions\SupportFragmentExtension.cs" />
+    <Compile Include="Extensions\TextViewExtension.cs" />
+    <Compile Include="Extensions\ImageViewExtension.cs" />
+    <Compile Include="Extensions\FragmentExtension.cs" />
+    <Compile Include="Extensions\ActivityExtension.cs" />
     <Compile Include="Extensions\ObjectExtension.cs" />
     <Compile Include="Input\GestureRecogniser.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
@@ -54,11 +78,33 @@
     <Compile Include="Widget\ImeEditText.cs" />
     <Compile Include="Widget\ItemGridView.cs" />
     <Compile Include="Widget\ItemListView.cs" />
+    <Compile Include="Widget\RoundedImageView\Corner.cs" />
+    <Compile Include="Widget\RoundedImageView\RoundedDrawable.cs" />
+    <Compile Include="Widget\RoundedImageView\RoundedImageView.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\Values\Attrs.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AppKit.UI\AppKit.UI.csproj">
+      <Project>{f4dc838e-b64f-4b67-a4c0-bff1aef458f8}</Project>
+      <Name>AppKit.UI</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
+  <Import Project="..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -5,6 +5,15 @@ namespace AdMaiora.AppKit.UI
     using Android.Content;
     using Android.Views;
 
+    public enum FlingDirection
+    {
+        Unknown,
+        FlingUp,
+        FlingRight,
+        FlingDown,
+        FlingLeft        
+    }
+
     public class MotionEventArgs : EventArgs
     {
         public MotionEventArgs(bool handled, MotionEvent ev)
@@ -41,13 +50,14 @@ namespace AdMaiora.AppKit.UI
 
     public class FlingEventArgs : EventArgs
     {
-        public FlingEventArgs(bool handled, MotionEvent e1, MotionEvent e2, float x, float y)
+        public FlingEventArgs(bool handled, MotionEvent e1, MotionEvent e2, float x, float y, FlingDirection direction)
         {
             this.Event1 = e1;
             this.Event2 = e2;
             this.X = x;
             this.Y = y;
             this.Handled = handled;
+            this.Direction = direction;
         }
 
         public MotionEvent Event1
@@ -79,14 +89,24 @@ namespace AdMaiora.AppKit.UI
             get;
             set;
         }
+
+        public FlingDirection Direction
+        {
+            get;
+            set;
+        }
+
     }
 
     public class GestureRecogniser : GestureDetector.SimpleOnGestureListener
     {
         #region Constants and Fields
 
-        EventHandler<View.TouchEventArgs> _eventHandler;
-        GestureDetector _gestureDetector;
+        private const int SWIPE_THRESHOLD = 100;
+        private const int SWIPE_VELOCITY_THRESHOLD = 100;
+
+        private EventHandler<View.TouchEventArgs> _eventHandler;
+        private  GestureDetector _gestureDetector;
 
         #endregion
 
@@ -112,12 +132,12 @@ namespace AdMaiora.AppKit.UI
             };
         }
 
-        public static GestureRecogniser ForDown(Context context, EventHandler<MotionEventArgs> eh) { GestureRecogniser g = new GestureRecogniser(context); g.Down += eh; return g; }
-        public static GestureRecogniser ForSingleTapUp(Context context, EventHandler<MotionEventArgs> eh) { GestureRecogniser g = new GestureRecogniser(context); g.SingleTapUp += eh; return g; }
-        public static GestureRecogniser ForLongPress(Context context, EventHandler<PressEventArgs> eh) { GestureRecogniser g = new GestureRecogniser(context); g.LongPress += eh; return g; }
-        public static GestureRecogniser ForShowPress(Context context, EventHandler<PressEventArgs> eh) { GestureRecogniser g = new GestureRecogniser(context); g.ShowPress += eh; return g; }
-        public static GestureRecogniser ForFling(Context context, EventHandler<FlingEventArgs> eh) { GestureRecogniser g = new GestureRecogniser(context); g.Fling += eh; return g; }
-        public static GestureRecogniser ForScroll(Context context, EventHandler<FlingEventArgs> eh) { GestureRecogniser g = new GestureRecogniser(context); g.Scroll += eh; return g; }
+        public static GestureRecogniser ForDown(Context context, EventHandler<MotionEventArgs> down) { GestureRecogniser g = new GestureRecogniser(context); g.Down += down; return g; }
+        public static GestureRecogniser ForSingleTapUp(Context context, EventHandler<MotionEventArgs> tap) { GestureRecogniser g = new GestureRecogniser(context); g.SingleTapUp += tap; return g; }
+        public static GestureRecogniser ForLongPress(Context context, EventHandler<PressEventArgs> longTap) { GestureRecogniser g = new GestureRecogniser(context); g.LongPress += longTap; return g; }
+        public static GestureRecogniser ForShowPress(Context context, EventHandler<PressEventArgs> shwoPress) { GestureRecogniser g = new GestureRecogniser(context); g.ShowPress += shwoPress; return g; }
+        public static GestureRecogniser ForFling(Context context, EventHandler<FlingEventArgs> fling) { GestureRecogniser g = new GestureRecogniser(context); g.Fling += fling; return g; }
+        public static GestureRecogniser ForScroll(Context context, EventHandler<FlingEventArgs> scroll) { GestureRecogniser g = new GestureRecogniser(context); g.Scroll += scroll; return g; }
 
         #endregion
 
@@ -176,10 +196,48 @@ namespace AdMaiora.AppKit.UI
         {
             if (Fling != null)
             {
-                var args = new FlingEventArgs(false, e1, e2, velocityX, velocityY);
+                FlingDirection direction = FlingDirection.Unknown;
+                try
+                {
+                    float diffY = e2.GetY() - e1.GetY();
+                    float diffX = e2.GetX() - e1.GetX();
+                    if (Math.Abs(diffX) > Math.Abs(diffY))
+                    {
+                        if (Math.Abs(diffX) > SWIPE_THRESHOLD && Math.Abs(velocityX) > SWIPE_VELOCITY_THRESHOLD)
+                        {
+                            if (diffX > 0)
+                            {
+                                direction = FlingDirection.FlingRight;
+                            }
+                            else
+                            {
+                                direction = FlingDirection.FlingLeft;
+                            }
+                        }
+                    }
+                    else if (Math.Abs(diffY) > SWIPE_THRESHOLD && Math.Abs(velocityY) > SWIPE_VELOCITY_THRESHOLD)
+                    {
+                        if (diffY > 0)
+                        {
+                            direction = FlingDirection.FlingDown;
+                        }
+                        else
+                        {
+                            direction = FlingDirection.FlingUp;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Android.Util.Log.Debug("APPKIT", ex.Message);
+                    direction = FlingDirection.Unknown;
+                }
+
+                var args = new FlingEventArgs(false, e1, e2, velocityX, velocityY, direction);
                 Fling(this, args);
                 return args.Handled;
             }
+
             return false;
         }
 
@@ -187,7 +245,7 @@ namespace AdMaiora.AppKit.UI
         {
             if (Scroll != null)
             {
-                var args = new FlingEventArgs(false, e1, e2, distanceX, distanceY);
+                var args = new FlingEventArgs(false, e1, e2, distanceX, distanceY, FlingDirection.Unknown);
                 Scroll(this, args);
                 return args.Handled;
             }

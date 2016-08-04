@@ -40,7 +40,6 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\NSBundleExtension.cs" />
     <Compile Include="Extensions\NSDateExtension.cs" />
     <Compile Include="Extensions\NSObjectExtension.cs" />
     <Compile Include="Extensions\UIAlertViewExtension.cs" />
@@ -58,12 +57,20 @@
     <Compile Include="Sources\UIItemListViewSource.cs" />
     <Compile Include="Sources\UIPickerListSource.cs" />
     <Compile Include="ViewBuilder.cs" />
+    <Compile Include="Widgets\UIBundledViewController.cs" />
+    <Compile Include="Widgets\UIControlledNavigationController.cs" />
     <Compile Include="Widgets\UIDrawerPanel.cs" />
     <Compile Include="Widgets\UIItemCollectionView.cs" />
     <Compile Include="Widgets\UIItemListView.cs" />
     <Compile Include="Widgets\UIRatingBar.cs" />
     <Compile Include="Widgets\UIToast.cs" />
     <Compile Include="Widgets\UIVideoPlayer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AppKit.UI\AppKit.UI.csproj">
+      <Project>{f4dc838e-b64f-4b67-a4c0-bff1aef458f8}</Project>
+      <Name>AppKit.UI</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

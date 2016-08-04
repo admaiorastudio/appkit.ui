@@ -52,7 +52,7 @@ namespace AdMaiora.AppKit.UI
     {
         #region Event Handlers
 
-        public event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public new event EventHandler<ItemListSelectEventArgs> ItemSelected;
         public event EventHandler<ItemListCommandEventArgs> ItemCommand;
 
         #endregion
@@ -93,6 +93,13 @@ namespace AdMaiora.AppKit.UI
         #endregion
 
         #region Public Methods
+
+        public void ReloadData()
+        {
+            var adapter = this.Adapter as BaseAdapter;
+            if (adapter != null)
+                adapter.NotifyDataSetChanged();
+        }
 
         public void SelectItem(int index, object item)
         {

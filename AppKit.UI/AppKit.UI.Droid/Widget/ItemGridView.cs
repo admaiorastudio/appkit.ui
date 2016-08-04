@@ -39,6 +39,13 @@ namespace AdMaiora.AppKit.UI
 
         #region Public Methods
 
+        public void ReloadData()
+        {
+            var adapter = this.Adapter as BaseAdapter;
+            if (adapter != null)
+                adapter.NotifyDataSetChanged();
+        }
+
         public void SelectItem(int index, object item)
         {
             OnItemSelected(index, item);
@@ -47,13 +54,6 @@ namespace AdMaiora.AppKit.UI
         public void ExecuteCommand(string command, object userData)
         {
             OnItemCommand(command, userData);
-        }
-
-        public void ReloadData()
-        {
-            var adapter = this.Adapter as BaseAdapter;
-            if (adapter != null)
-                adapter.NotifyDataSetChanged();
         }
 
         #endregion

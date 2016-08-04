@@ -56,7 +56,6 @@
             label.Frame = frame;
         }
 
-
         public static void SetText(this UILabel label, string text, float padding = 0)
         {
             label.Text = text;
@@ -66,6 +65,22 @@
         public static void SetText(this UILabel label, string text, float padding = 0, bool center = false)
         {
             label.SetText(text, padding, padding, center, center);
+        }
+
+        public static void SetTextBold(this UILabel label, bool bold)
+        {
+            UIFont system = UIFont.SystemFontOfSize(label.Font.PointSize);
+            UIFont systemBold = UIFont.BoldSystemFontOfSize(label.Font.PointSize);            
+
+            // Are we using system font?
+            if(label.Font.FamilyName == system.FamilyName)
+            {
+                label.Font = bold ? systemBold : system;
+            }
+            else
+            {
+                label.Font = ViewBuilder.FontFromAsset(label.Font.Name, label.Font.PointSize, bold);
+            }
         }
 
     }
