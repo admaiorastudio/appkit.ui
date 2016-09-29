@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AdMaiora AppKit Core iOS")]
-[assembly: AssemblyDescription("AdMaiora AppKit Core iOS")]
+[assembly: AssemblyTitle("AdMaiora AppKit UI iOS")]
+[assembly: AssemblyDescription("AdMaiora AppKit UI iOS")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Ad Maiora Studio")]
-[assembly: AssemblyProduct("AdMaiora AppKit Core iOS")]
+[assembly: AssemblyProduct("AdMaiora AppKit UI iOS")]
 [assembly: AssemblyCopyright("Copyright Ad Maiora Studio ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

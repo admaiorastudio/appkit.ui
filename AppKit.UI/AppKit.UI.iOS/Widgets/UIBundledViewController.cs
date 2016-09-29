@@ -29,7 +29,7 @@ namespace AdMaiora.AppKit.UI
 
         public void PutAll(Bundle bundle)
         {            
-            foreach (var kvp in _values)
+            foreach (var kvp in bundle._values)
                 _values.Add(kvp.Key, kvp.Value);
         }
 

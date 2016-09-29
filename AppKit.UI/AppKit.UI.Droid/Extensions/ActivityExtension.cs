@@ -13,6 +13,12 @@ namespace AdMaiora.AppKit.UI
 
     public static class ActivityExtension
     {
+        public static void SetContentViewWithWidgets(this Activity activity, int layoutResID)
+        {
+            activity.SetContentView(layoutResID);
+            ViewBuilder.GetWidgets(activity);
+        }
+
         public static void SetActionBarTitle(this Activity activity, string title)
         {
             if (activity.ActionBar != null)

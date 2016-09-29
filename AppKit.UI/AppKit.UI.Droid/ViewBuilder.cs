@@ -2,12 +2,38 @@ namespace AdMaiora.AppKit.UI
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Android.App;
     using Android.Content.Res;
     using Android.Graphics;
+    using Android.OS;
     using Android.Views;
     using Android.Widget;
+
+#pragma warning disable 0219, 0649
+
+    class FalseActivity : Activity
+    {
+        protected override void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
+
+            this.FindViewById(0);                    
+        }
+    }
+
+    class FalseFragment : Android.Support.V4.App.Fragment
+    {
+        public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        {
+            return base.OnCreateView(inflater, container, savedInstanceState);
+
+            this.View.FindViewById(0);            
+        }
+    }
+
+#pragma warning restore 0219, 0649
 
     public class WidgetAttribute : Attribute
     {
@@ -55,32 +81,6 @@ namespace AdMaiora.AppKit.UI
         #region Constants and Fields
 
         private static Dictionary<string, Typeface> _fonts;
-
-        #endregion
-
-        #region Properties
-
-        public static ColorStateList ClickableColorSateList
-        {
-            get
-            {
-                return new ColorStateList
-                    (
-                        new int[][]
-                    {
-                        new int[] { Android.Resource.Attribute.StatePressed },
-                        new int[] { Android.Resource.Attribute.StateFocused },
-                        new int[] { 0 }
-                    },
-                        new int[]
-                    {
-                        Color.Gray,
-                        Color.Gray,
-                        Color.White
-                    }
-                    );
-            }
-        }
 
         #endregion
 
@@ -151,55 +151,7 @@ namespace AdMaiora.AppKit.UI
             }
         }
 
-        public static int AsPixels(float dp)
-        {
-            return
-                (int)Math.Round(Android.App.Application.Context.Resources.DisplayMetrics.Density * dp);
-        }
-
-        public static LayoutConfigurator<TLayoutParameters> ConfigureLayout<TLayoutParameters>()
-        {
-            Type requestedType = typeof(TLayoutParameters);
-            object lp = null;
-
-            if (requestedType == typeof(LinearLayout.LayoutParams))
-            {
-                lp = new LinearLayout
-                    .LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent);
-            }
-            else if (requestedType == typeof(RelativeLayout.LayoutParams))
-            {
-                lp = new RelativeLayout
-                    .LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent);
-            }
-            else if (requestedType == typeof(AbsListView.LayoutParams))
-            {
-                lp = new AbsListView
-                    .LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent);
-            }
-            else if (requestedType == typeof(FrameLayout.LayoutParams))
-            {
-                lp = new FrameLayout
-                    .LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent);
-            }
-            else if (requestedType == typeof(ImageSwitcher.LayoutParams))
-            {
-                lp = new ImageSwitcher
-                    .LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent);
-            }
-            else
-            {
-                // Unsopported layout.
-                throw new InvalidOperationException(
-                    String.Format("Unsopported layout type '{0}'. Unable to configure.", requestedType.Name));
-            }
-
-            LayoutConfigurator<TLayoutParameters> configurator = new LayoutConfigurator<TLayoutParameters>((TLayoutParameters)lp);
-
-            return configurator;
-        }
-
-        public static View[] GetWidgets(object context, Func<int, View> getter)
+        public static View[] GetWidgets(object context, View container = null)
         {
             Type type = context.GetType();
             var fields = type.GetFields(System.Reflection.BindingFlags.Instance
@@ -207,32 +159,48 @@ namespace AdMaiora.AppKit.UI
                 | System.Reflection.BindingFlags.Public
                 | System.Reflection.BindingFlags.DeclaredOnly);
 
+
+
             if (fields == null || fields.Length == 0)
                 return null;
+                      
+            var getter = type.GetMethods().Where(m => m.Name == "FindViewById" && !m.IsGenericMethod).FirstOrDefault();
+            if(getter == null && container == null)
+                throw new InvalidOperationException("You can't get widgets out of an Activity a Fragment or a View.");
 
             List<View> views = new List<View>();
 
-            bool isWidgetAttributeUsed = false;
+            //bool isWidgetAttributeUsed = false;
             foreach (var field in fields)
             {
                 var attributes = field.GetCustomAttributes(typeof(WidgetAttribute), false);
                 if (attributes == null || attributes.Length == 0)
                     continue;
 
-                isWidgetAttributeUsed = true;
+                //isWidgetAttributeUsed = true;
 
                 Type fieldType = field.FieldType;
                 int id = Application.Context.Resources.GetIdentifier(field.Name, "id", Application.Context.PackageName);
-                View view = getter(id);
+                View view = container != null ? container.FindViewById(id) : (View)getter.Invoke(context, new object[] { id });
                 field.SetValue(context, view);
 
                 views.Add(view);
             }
 
-            if (!isWidgetAttributeUsed)
-                throw new InvalidOperationException("Did you miss the 'Widget' attribute in your fields?");
+            //if (!isWidgetAttributeUsed)
+            //    throw new InvalidOperationException("Did you miss the 'Widget' attribute in your fields?");
 
             return views.ToArray();
+        }
+
+        #endregion
+
+        #region Platform Specific Methods
+
+        public static int AsPixels(float dp)
+        {
+            return
+                (int)Math.Round(Android.App.Application.Context.Resources.DisplayMetrics.Density * dp);
         }
 
         #endregion

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>AdMaiora.AppKit.UI</id>
-    <version>1.0.2</version>
+    <version>1.0.4</version>
 	<title>AdMaiora UI AppKit for Xamarin (PCL)</title>
     <authors>Ad Maiora Studio</authors>
     <owners>Ad Maiora Studio</owners>
@@ -11,11 +11,12 @@
     <releaseNotes>First release</releaseNotes>
     <copyright>Copyright Ad Maiora Studio ©  2016</copyright>
 	<projectUrl>https://github.com/admaiorastudio/appkit.ui</projectUrl>
-	<iconUrl>http://www.admaiorastudio.com/img/logo.png</iconUrl>
+	<iconUrl>http://www.admaiorastudio.com/img/logo-nuget.png</iconUrl>
     <tags>AdMaiora AppKit UI pcl Xamarin</tags>
     <dependencies>
 		<group targetFramework="monoandroid60">		
 			<dependency id="Xamarin.Android.Support.v7.AppCompat" version="23.4.0.1" />
+			<dependency id="Xamarin.Android.Support.v7.RecyclerView" version="23.4.0.1" />
 		</group>
     </dependencies>
   </metadata>

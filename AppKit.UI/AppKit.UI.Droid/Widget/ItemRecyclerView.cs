@@ -5,54 +5,13 @@ namespace AdMaiora.AppKit.UI
     using Android.Content;
     using Android.Util;
     using Android.Widget;
+    using Android.Support.V7.Widget;
 
-    public class ItemListSelectEventArgs : EventArgs
-    {
-        public ItemListSelectEventArgs(int index, object item)
-        {
-            this.Index = index;
-            this.Item = item;
-        }
-
-        public int Index
-        {
-            get;
-            private set;
-        }
-
-        public object Item
-        {
-            get;
-            private set;
-        }
-    }
-
-    public class ItemListCommandEventArgs : EventArgs
-    {
-        public ItemListCommandEventArgs(string command, object userData)
-        {
-            this.Command = command;
-            this.UserData = userData;
-        }
-
-        public string Command
-        {
-            get;
-            private set;
-        }
-
-        public object UserData
-        {
-            get;
-            private set;
-        }
-    }
-
-    public class ItemListView : ListView
+    public class ItemRecyclerView : Android.Support.V7.Widget.RecyclerView
     {
         #region Event Handlers
 
-        public new event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public event EventHandler<ItemListSelectEventArgs> ItemSelected;
         public event EventHandler<ItemListCommandEventArgs> ItemCommand;
 
         #endregion
@@ -71,19 +30,19 @@ namespace AdMaiora.AppKit.UI
 
         #region Constructors and Destructors
 
-        public ItemListView(Context context)
+        public ItemRecyclerView(Context context)
             : base(context)
         {
             Initialize();
         }
 
-        public ItemListView(Context context, IAttributeSet attrs)
+        public ItemRecyclerView(Context context, IAttributeSet attrs)
             : base(context, attrs)
         {
             Initialize();
         }
 
-        public ItemListView(Context context, IAttributeSet attrs, int defStyle)
+        public ItemRecyclerView(Context context, IAttributeSet attrs, int defStyle)
             : base(context, attrs, defStyle)
         {
             Initialize();
@@ -95,7 +54,7 @@ namespace AdMaiora.AppKit.UI
 
         public void ReloadData()
         {
-            var adapter = this.Adapter as BaseAdapter;
+            var adapter = this.GetAdapter() as Android.Support.V7.Widget.RecyclerView.Adapter;
             if (adapter != null)
                 adapter.NotifyDataSetChanged();
         }
@@ -132,24 +91,12 @@ namespace AdMaiora.AppKit.UI
 
         private void Initialize()
         {
-            this.ItemClick += ItemListView_ItemClick;
+            SetLayoutManager(new LinearLayoutManager(this.Context));
         }
 
         #endregion
 
         #region Event Handlers
-
-        private void ItemListView_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            var o = this.Adapter.GetItem(e.Position);
-            var h = o as JavaHolder;
-            if (h == null)
-                return;
-
-            var item = h.Instance;
-
-            SelectItem(e.Position, item);
-        }
 
         #endregion
     }

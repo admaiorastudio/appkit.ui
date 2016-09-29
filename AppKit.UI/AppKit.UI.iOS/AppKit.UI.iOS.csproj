@@ -66,11 +66,5 @@
     <Compile Include="Widgets\UIToast.cs" />
     <Compile Include="Widgets\UIVideoPlayer.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AppKit.UI\AppKit.UI.csproj">
-      <Project>{f4dc838e-b64f-4b67-a4c0-bff1aef458f8}</Project>
-      <Name>AppKit.UI</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

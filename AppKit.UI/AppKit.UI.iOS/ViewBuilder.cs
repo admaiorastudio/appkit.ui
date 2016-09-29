@@ -81,6 +81,45 @@ namespace AdMaiora.AppKit.UI
             }
         }
 
+        public static UIView[] GetWidgets(object context)
+        {
+            Type type = context.GetType();
+            var properties = type.GetProperties(System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.NonPublic
+                | System.Reflection.BindingFlags.Public
+                | System.Reflection.BindingFlags.DeclaredOnly
+                | System.Reflection.BindingFlags.GetProperty);
+
+            if (properties == null || properties.Length == 0)
+                return null;
+
+            List<UIView> views = new List<UIView>();
+
+            //bool isWidgetAttributeUsed = false;
+            foreach (var property in properties)
+            {
+                var attributes = property.GetCustomAttributes(typeof(OutletAttribute), false);
+                if (attributes == null || attributes.Length == 0)
+                    continue;
+
+                //isWidgetAttributeUsed = true;
+
+                Type fieldType = property.PropertyType;
+                UIView view = property.GetValue(context) as UIView;
+
+                views.Add(view);
+            }
+
+            //if (!isWidgetAttributeUsed)
+            //    throw new InvalidOperationException("Did you miss the 'Outlet' attribute in your fields?");
+
+            return views.ToArray();
+        }
+
+        #endregion
+
+        #region Platform Specific Methods
+
         public static UIImage MonochromatizeImage(UIImage source, UIColor color)
         {
             UIGraphics.BeginImageContextWithOptions(source.Size, false, 0);
@@ -113,41 +152,6 @@ namespace AdMaiora.AppKit.UI
         public static UIImage CreateBackgroundFromColor(string aarrggbb)
         {
             return CreateBackgroundFromColor(ViewBuilder.ColorFromARGB(aarrggbb));
-        }
-
-        public static UIView[] GetWidgets(object context)
-        {
-            Type type = context.GetType();
-            var properties = type.GetProperties(System.Reflection.BindingFlags.Instance
-                | System.Reflection.BindingFlags.NonPublic
-                | System.Reflection.BindingFlags.Public
-                | System.Reflection.BindingFlags.DeclaredOnly
-                | System.Reflection.BindingFlags.GetProperty);
-
-            if (properties == null || properties.Length == 0)
-                return null;
-
-            List<UIView> views = new List<UIView>();
-
-            bool isWidgetAttributeUsed = false;
-            foreach (var property in properties)
-            {
-                var attributes = property.GetCustomAttributes(typeof(OutletAttribute), false);
-                if (attributes == null || attributes.Length == 0)
-                    continue;
-
-                isWidgetAttributeUsed = true;
-
-                Type fieldType = property.PropertyType;
-                UIView view = property.GetValue(context) as UIView;
-
-                views.Add(view);
-            }
-
-            if (!isWidgetAttributeUsed)
-                throw new InvalidOperationException("Did you miss the 'Outlet' attribute in your fields?");
-
-            return views.ToArray();
         }
 
         #endregion

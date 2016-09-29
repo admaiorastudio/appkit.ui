@@ -15,7 +15,7 @@
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v6.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v7.0</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -55,6 +55,10 @@
       <HintPath>..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.v7.AppCompat.23.4.0.1\lib\MonoAndroid403\Xamarin.Android.Support.v7.AppCompat.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Xamarin.Android.Support.v7.RecyclerView, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\Chatty\packages\Xamarin.Android.Support.v7.RecyclerView.23.4.0.1\lib\MonoAndroid403\Xamarin.Android.Support.v7.RecyclerView.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Xamarin.Android.Support.Vector.Drawable, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\lib\MonoAndroid403\Xamarin.Android.Support.Vector.Drawable.dll</HintPath>
       <Private>True</Private>
@@ -63,6 +67,8 @@
   <ItemGroup>
     <Compile Include="Adapters\ExpandableItemListAdapter.cs" />
     <Compile Include="Adapters\ItemListAdapter.cs" />
+    <Compile Include="Adapters\ItemRecyclerAdapter.cs" />
+    <Compile Include="Extensions\LayoutInflaterExtension.cs" />
     <Compile Include="Extensions\SupportActivityExtension.cs" />
     <Compile Include="Extensions\SupportFragmentExtension.cs" />
     <Compile Include="Extensions\TextViewExtension.cs" />
@@ -77,6 +83,7 @@
     <Compile Include="Widget\ExpandableItemListView.cs" />
     <Compile Include="Widget\ImeEditText.cs" />
     <Compile Include="Widget\ItemGridView.cs" />
+    <Compile Include="Widget\ItemRecyclerView.cs" />
     <Compile Include="Widget\ItemListView.cs" />
     <Compile Include="Widget\RoundedImageView\Corner.cs" />
     <Compile Include="Widget\RoundedImageView\RoundedDrawable.cs" />
@@ -91,12 +98,7 @@
   <ItemGroup>
     <AndroidResource Include="Resources\Values\Attrs.xml" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AppKit.UI\AppKit.UI.csproj">
-      <Project>{f4dc838e-b64f-4b67-a4c0-bff1aef458f8}</Project>
-      <Name>AppKit.UI</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\..\..\..\..\Studio Cassolato\MySimec\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
