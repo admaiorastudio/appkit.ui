@@ -31,6 +31,10 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.7.0.1\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -40,31 +44,35 @@
     <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Application\UISubViewController.cs" />
     <Compile Include="Extensions\NSDateExtension.cs" />
     <Compile Include="Extensions\NSObjectExtension.cs" />
     <Compile Include="Extensions\UIAlertViewExtension.cs" />
     <Compile Include="Extensions\UIBarButtonItemExtension.cs" />
     <Compile Include="Extensions\UIButtonExtension.cs" />
     <Compile Include="Extensions\UILabelExtension.cs" />
-    <Compile Include="Extensions\UIViewControllerExtension.cs" />
     <Compile Include="Extensions\UINavigationControllerExtension.cs" />
     <Compile Include="Extensions\UINavigationItem.cs" />
     <Compile Include="Extensions\UIPickerViewExtension.cs" />
     <Compile Include="Extensions\UITextFieldExtension.cs" />
     <Compile Include="Extensions\UIViewExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sources\UIBundle.cs" />
     <Compile Include="Sources\UIItemCollectionViewSource.cs" />
     <Compile Include="Sources\UIItemListViewSource.cs" />
     <Compile Include="Sources\UIPickerListSource.cs" />
     <Compile Include="ViewBuilder.cs" />
-    <Compile Include="Widgets\UIBundledViewController.cs" />
-    <Compile Include="Widgets\UIControlledNavigationController.cs" />
+    <Compile Include="Application\UIControlledNavigationController.cs" />
     <Compile Include="Widgets\UIDrawerPanel.cs" />
     <Compile Include="Widgets\UIItemCollectionView.cs" />
     <Compile Include="Widgets\UIItemListView.cs" />
+    <Compile Include="Application\UIMainViewController.cs" />
     <Compile Include="Widgets\UIRatingBar.cs" />
     <Compile Include="Widgets\UIToast.cs" />
     <Compile Include="Widgets\UIVideoPlayer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
 </Project>

@@ -180,7 +180,7 @@ namespace AdMaiora.AppKit.UI
                 //isWidgetAttributeUsed = true;
 
                 Type fieldType = field.FieldType;
-                int id = Application.Context.Resources.GetIdentifier(field.Name, "id", Application.Context.PackageName);
+                int id = Android.App.Application.Context.Resources.GetIdentifier(field.Name, "id", Android.App.Application.Context.PackageName);
                 View view = container != null ? container.FindViewById(id) : (View)getter.Invoke(context, new object[] { id });
                 field.SetValue(context, view);
 

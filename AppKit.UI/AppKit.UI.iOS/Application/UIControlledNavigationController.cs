@@ -8,12 +8,9 @@ namespace AdMaiora.AppKit.UI
     using Foundation;
     using UIKit;
 
-    public interface IBackButton
-    {
-        bool ViewWillPop();
-    }
+    using AdMaiora.AppKit.UI.App;
 
-    public class UIControlledNavigationController : UINavigationController, IUINavigationBarDelegate
+    class UIControlledNavigationController : UINavigationController, IUINavigationBarDelegate
     {
         #region Constants and Fields
 
@@ -41,11 +38,7 @@ namespace AdMaiora.AppKit.UI
             if (this.ViewControllers.Length < this.NavigationBar.Items.Length)
                 return true;
 
-            bool shouldPop = true;
-            UIViewController controller = this.TopViewController;
-            if (controller is IBackButton)
-                shouldPop = !((IBackButton)controller).ViewWillPop();
-
+            bool shouldPop = ((UIMainViewController)this.ParentViewController).ShouldPopItem();
             if (shouldPop)
             {
                 CoreFoundation.DispatchQueue.MainQueue.DispatchAsync(() => PopViewController(true));
