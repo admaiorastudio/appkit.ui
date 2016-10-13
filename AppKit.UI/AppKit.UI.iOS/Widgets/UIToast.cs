@@ -1,6 +1,7 @@
 namespace AdMaiora.AppKit.UI
 {
     using System;
+    using System.Linq;
 
     using UIKit;
     using CoreGraphics;
@@ -14,8 +15,7 @@ namespace AdMaiora.AppKit.UI
     public class UIToast
     {
         #region Constants and Fields
-
-        private UIWindow _window;
+        
         private UIView _toast;        
         private UILabel _textLabel;
 
@@ -27,9 +27,9 @@ namespace AdMaiora.AppKit.UI
 
         public UIToast(string text, UIToastLength duration)
         {
-            _window = UIApplication.SharedApplication.Windows[0];
+            UIWindow window = UIApplication.SharedApplication.Windows.Last();
 
-            nfloat maxWidth = _window.Bounds.Width - 32f;
+            nfloat maxWidth = window.Bounds.Width - 32f;
             var frame = new CGRect(0, 0, 0, 21f);
 
             // Setting lable
@@ -49,8 +49,8 @@ namespace AdMaiora.AppKit.UI
             if(frame.Width < maxWidth)
             {
                 nfloat width = frame.Width + 12f;
-                nfloat x = (_window.Bounds.Width - width) * .5f;
-                frame = new CGRect(x, _window.Bounds.Height - (frame.Height + 80f), width, frame.Height + 8f);
+                nfloat x = (window.Bounds.Width - width) * .5f;
+                frame = new CGRect(x, window.Bounds.Height - (frame.Height + 80f), width, frame.Height + 8f);
             }
             else
             {                                
@@ -61,7 +61,7 @@ namespace AdMaiora.AppKit.UI
                 _textLabel.SizeToFitHeight();
                 frame = _textLabel.Frame;    
 
-                frame = new CGRect(4f, _window.Bounds.Height - (frame.Height + 80f), _window.Bounds.Width - 8f, frame.Height + 8f);
+                frame = new CGRect(4f, window.Bounds.Height - (frame.Height + 80f), window.Bounds.Width - 8f, frame.Height + 8f);
             }
 
             // Creating label container
@@ -95,12 +95,14 @@ namespace AdMaiora.AppKit.UI
         }
 
         public void Show()
-        {            
+        {
+            UIWindow window = UIApplication.SharedApplication.Windows.Last();
+
             _toast.Alpha = 0f;
 
             if (_toast.Superview == null)
-                _window.Add(_toast);
-
+                window .Add(_toast);
+        
             float delay = _duration == UIToastLength.Short ? 1f : 1.5f;
 
             UIView.Animate(.4f * delay,

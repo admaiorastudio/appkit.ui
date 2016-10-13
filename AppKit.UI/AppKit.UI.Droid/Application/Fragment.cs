@@ -51,6 +51,29 @@ namespace AdMaiora.AppKit.UI.App
             }
         }
 
+        public new Bundle Arguments
+        {
+            get
+            {
+                if (base.Arguments == null)
+                    base.Arguments = new Bundle();
+
+                return base.Arguments;
+            }
+            set
+            {
+                var arguments = new Bundle();
+
+                if (base.Arguments != null)
+                    arguments.PutAll(base.Arguments);
+
+                if (value != null)
+                    arguments.PutAll(value);
+
+                base.Arguments = arguments;
+            }
+        }
+
         #endregion
 
         #region Fragment Methods

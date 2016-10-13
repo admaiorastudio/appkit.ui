@@ -59,11 +59,22 @@ namespace AdMaiora.AppKit.UI.App
         {
             get
             {
+                if (_bundle == null)
+                    _bundle = new UIBundle();
+
                 return _bundle;
             }
             set
             {
-                _bundle = value;
+                var arguments = new UIBundle();
+
+                if (_bundle != null)
+                    arguments.PutAll(_bundle);
+
+                if (value != null)
+                    arguments.PutAll(value);
+
+                _bundle = arguments;
             }
         }
 

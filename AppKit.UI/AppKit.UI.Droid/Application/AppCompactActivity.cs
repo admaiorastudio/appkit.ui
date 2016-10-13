@@ -24,6 +24,9 @@ namespace AdMaiora.AppKit.UI.App
         #endregion
 
         #region Constants and Fields
+
+        private Bundle _extras;
+
         #endregion
 
         #region Widgets
@@ -42,26 +45,32 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Properties
 
+        public Bundle Arguments
+        {
+            get
+            {
+                if (_extras == null)
+                    _extras = new Bundle();
+
+                Bundle extras = new Bundle();
+                if (_extras != null)
+                    extras.PutAll(_extras);
+
+                if (this.Intent.Extras != null)
+                    extras.PutAll(this.Intent.Extras);
+
+                return extras;
+            }
+            set
+            {
+                if (value != null)
+                    _extras = value;
+            }
+        }
+
         #endregion
 
         #region Activity Methods
-
-        protected override void OnCreate(Bundle bundle)
-        {
-            base.OnCreate(bundle);
-
-            #region Desinger Stuff
-
-            SetContentView(0);
-
-            #endregion
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-        }
-
         #endregion
 
         #region Public Methods
@@ -69,14 +78,14 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Methods
         
-        protected void SetContentView(int layoutResID, Android.Support.V7.Widget.Toolbar toolbar = null)
+        protected void SetContentView(int layoutResID, int toolBarResId = 0)
         {
             base.SetContentView(layoutResID);
             ViewBuilder.GetWidgets(this);
 
-            if (toolbar != null)
+            if (toolBarResId != 0)
             {
-                this.Toolbar = toolbar;
+                this.Toolbar = FindViewById< Android.Support.V7.Widget.Toolbar>(toolBarResId);
                 SetSupportActionBar(this.Toolbar);
             }
         }

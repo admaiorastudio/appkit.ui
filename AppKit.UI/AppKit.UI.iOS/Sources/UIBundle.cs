@@ -44,7 +44,7 @@ namespace AdMaiora.AppKit.UI
             if (!_values.ContainsKey(key))
                 return defaultValue;
 
-            return _values[key].ToString();
+            return _values[key]?.ToString();
         }
         public string GetString(string key)
         {
@@ -322,7 +322,6 @@ namespace AdMaiora.AppKit.UI
         }
 
         #endregion
-
     }
 
 }

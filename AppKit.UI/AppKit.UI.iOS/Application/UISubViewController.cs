@@ -37,18 +37,6 @@
 
         #region Properties
 
-        public UIBundle Arguments
-        {
-            get
-            {
-                return _bundle;
-            }
-            set
-            {
-                _bundle = value;
-            }
-        }
-
         public UIViewController MainViewController
         {
             get
@@ -65,6 +53,29 @@
                     return null;
 
                 return this.NavigationController.NavigationBar;
+            }
+        }
+
+        public UIBundle Arguments
+        {
+            get
+            {
+                if (_bundle == null)
+                    _bundle = new UIBundle();
+
+                return _bundle;
+            }
+            set
+            {
+                var arguments = new UIBundle();
+
+                if (_bundle != null)
+                    arguments.PutAll(_bundle);
+
+                if (value != null)
+                    arguments.PutAll(value);
+
+                _bundle = arguments;
             }
         }
 
@@ -91,6 +102,38 @@
                     CGRect keyboardBeginFrame = ((NSValue)notification.UserInfo[UIKeyboard.FrameBeginUserInfoKey]).CGRectValue;
                     UIViewAnimationCurve animationCurve = (UIViewAnimationCurve)((NSNumber)notification.UserInfo[UIKeyboard.AnimationCurveUserInfoKey]).Int32Value;
                     int animationDuration = ((NSNumber)notification.UserInfo[UIKeyboard.AnimationDurationUserInfoKey]).Int32Value;
+
+                    #region Notify Logic
+
+                    if (_isNotifyngKeyboardStatus)
+                    {
+                        CGRect windowRect = this.View.Window.Frame;
+
+                        // Check if the final keyboard frame is outside the windows
+                        // This means that the keyboard is going to be hidden
+                        bool isShowing = keyboardEndFrame.Y < windowRect.Bottom;
+
+                        if (isShowing)
+                        {
+                            if (!_isKeyboardVisible)
+                            {
+                                _isKeyboardVisible = true;
+
+                                KeyboardWillShow();
+                            }
+                        }
+                        else
+                        {
+                            if (_isKeyboardVisible)
+                            {
+                                _isKeyboardVisible = false;
+
+                                KeyboardWillHide();
+                            }
+                        }
+                    }
+
+                    #endregion
 
                     #region Resize logic
 
@@ -162,11 +205,9 @@
                                 {
                                     if ((responderFrame.Y + responderFrame.Height) <= availableHeight)
                                     {
-                                        offset = navbarOffset;
-                                        //responderOffset = 0;
-
+                                        offset = navbarOffset;                                        
                                         if (view.Frame.Y == navbarOffset)
-                                            return;
+                                            offset = nfloat.MinValue;
                                     }
                                     else
                                     {
@@ -182,37 +223,18 @@
                                     offset = navbarOffset;
                                 }
 
-                                UIView.BeginAnimations(null);
-                                UIView.SetAnimationBeginsFromCurrentState(true);
-                                UIView.SetAnimationDuration(animationDuration * 0.95);
-                                UIView.SetAnimationCurve(animationCurve);
-                                CGRect newFrame = view.Frame;
-                                newFrame.Y = offset;
-                                view.Frame = newFrame;
-                                UIView.CommitAnimations();
+                                if (offset != nfloat.MinValue)
+                                {
+                                    UIView.BeginAnimations(null);
+                                    UIView.SetAnimationBeginsFromCurrentState(true);
+                                    UIView.SetAnimationDuration(animationDuration * 0.95);
+                                    UIView.SetAnimationCurve(animationCurve);
+                                    CGRect newFrame = view.Frame;
+                                    newFrame.Y = offset;
+                                    view.Frame = newFrame;
+                                    UIView.CommitAnimations();
+                                }
                             }
-                        }
-                    }
-
-                    #endregion
-
-                    #region Notify Logic
-
-                    if (_isNotifyngKeyboardStatus)
-                    {                        
-                        CGRect windowRect = this.View.Window.Frame;
-
-                        // Check if the final keyboard frame is outside the windows
-                        // This means that the keyboard is going to be hidden
-                        bool isShowing = keyboardEndFrame.Y < windowRect.Bottom;
-
-                        if (isShowing)
-                        {
-                            KeyboardWillShow();
-                        }
-                        else
-                        {
-                            KeyboardWillHide();
                         }
                     }
 
