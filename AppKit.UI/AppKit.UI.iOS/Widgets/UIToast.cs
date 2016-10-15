@@ -14,8 +14,20 @@ namespace AdMaiora.AppKit.UI
 
     public class UIToast
     {
+        #region Inner Classes
+
+        class UIStatusBarViewController : UIViewController
+        {
+            public override bool PrefersStatusBarHidden()
+            {
+                return true;
+            }
+        }
+
+        #endregion
+
         #region Constants and Fields
-        
+
         private UIView _toast;        
         private UILabel _textLabel;
 
@@ -27,8 +39,8 @@ namespace AdMaiora.AppKit.UI
 
         public UIToast(string text, UIToastLength duration)
         {
-            UIWindow window = UIApplication.SharedApplication.Windows.Last();
-
+            UIWindow window = UIApplication.SharedApplication.Windows[0];
+            
             nfloat maxWidth = window.Bounds.Width - 32f;
             var frame = new CGRect(0, 0, 0, 21f);
 
@@ -96,12 +108,20 @@ namespace AdMaiora.AppKit.UI
 
         public void Show()
         {
-            UIWindow window = UIApplication.SharedApplication.Windows.Last();
+            //UIWindow window = UIApplication.SharedApplication.Windows.Last();
+            UIWindow window = new UIWindow(UIScreen.MainScreen.Bounds);
+            window.BackgroundColor = UIColor.Clear;
+            window.WindowLevel = UIWindowLevel.Alert;
+            window.RootViewController = UIApplication.SharedApplication.Windows[0].RootViewController;
+            window.UserInteractionEnabled = false;
 
             _toast.Alpha = 0f;
 
             if (_toast.Superview == null)
-                window .Add(_toast);
+            {
+                window.Add(_toast);
+                window.MakeKeyAndVisible();
+            }
         
             float delay = _duration == UIToastLength.Short ? 1f : 1.5f;
 
@@ -124,6 +144,9 @@ namespace AdMaiora.AppKit.UI
                         || _toast.Layer.AnimationKeys.Length == 0)
                     {
                         _toast.RemoveFromSuperview();
+
+                        window.Hidden = true;
+                        window.RemoveFromSuperview();
                     }
                 });
             });

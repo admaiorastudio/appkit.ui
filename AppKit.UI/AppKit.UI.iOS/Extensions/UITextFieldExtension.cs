@@ -4,6 +4,7 @@
 
     using UIKit;
     using Foundation;
+    using CoreFoundation;
 
     public static class UITextFieldExtension
     {
@@ -36,6 +37,12 @@
             astring.AddAttribute(UIStringAttributeKey.ForegroundColor, color, new NSRange(0, t.Length));
 
             text.AttributedPlaceholder = astring;
+        }
+
+        public static void RequestUserInput(this UITextField text, float delay = 0f)
+        {
+            var interval = new DispatchTime(CoreFoundation.DispatchTime.Now, (long)delay * 1000000);
+            DispatchQueue.MainQueue.DispatchAfter(interval,() => text.BecomeFirstResponder());
         }
     }
 }

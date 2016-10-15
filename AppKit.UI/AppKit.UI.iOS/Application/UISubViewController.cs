@@ -141,7 +141,7 @@
                     {
                         // Get View Controller view
                         UIView view = this.View;
-                        if (view != null)
+                        if (view != null && view.Frame.X == 0)
                         {
                             bool hasNavigationBar = this.NavigationController != null
                                 && this.NavigationController.NavigationBarHidden == false;
@@ -172,7 +172,7 @@
                     {
                         // Get View Controller view
                         UIView view = this.View;
-                        if (view != null)
+                        if (view != null && view.Frame.X == 0)
                         {
                             // Get first responder
                             UIView responder = view.GetFirstResponder();

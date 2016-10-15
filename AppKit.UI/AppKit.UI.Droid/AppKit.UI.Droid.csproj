@@ -76,6 +76,7 @@
     <Compile Include="Application\Fragment.cs" />
     <Compile Include="Extensions\BundleExtension.cs" />
     <Compile Include="Extensions\LayoutInflaterExtension.cs" />
+    <Compile Include="Extensions\EditTextExtension.cs" />
     <Compile Include="Extensions\TextViewExtension.cs" />
     <Compile Include="Extensions\ImageViewExtension.cs" />
     <Compile Include="Extensions\ObjectExtension.cs" />
