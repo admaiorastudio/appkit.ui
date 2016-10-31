@@ -11,9 +11,45 @@
     public class UISubViewController : UIViewController
     {
         #region Inner Classes
+
+        public class UIBarButtonCreator
+        {
+            private UISubViewController _controller;
+            private List<UIBarButtonItem> _items;            
+
+            public UIBarButtonCreator(UISubViewController controller)
+            {
+                _controller = controller;
+                _items = new List<UIBarButtonItem>();
+            }
+
+            public UIBarButtonCreator AddItem(string title, UIBarButtonItemStyle style)
+            {
+                int index = _items.Count;
+                _items.Add(new UIBarButtonItem(title, style, (s, e) => _controller.BarButtonItemSelected(index)));
+
+                return this;
+            }
+
+            public UIBarButtonCreator AddItem(UIImage image, UIBarButtonItemStyle style)
+            {
+                int index = _items.Count;
+                _items.Add(new UIBarButtonItem(image, style, (s, e) => _controller.BarButtonItemSelected(index)));
+
+                return this;
+            }
+
+            public UIBarButtonItem[] GetItems()
+            {
+                return _items.ToArray();
+            }
+        }
+
         #endregion
 
         #region Constants and Fields
+
+        public const int BarButtonBack = -1;
 
         private UIBundle _bundle;
 
@@ -23,6 +59,8 @@
 
         private bool _isKeyboardVisible;
         private NSObject _keyboardObserver;
+
+        private bool _hasBarButtonItems;
 
         #endregion
 
@@ -79,6 +117,25 @@
             }
         }
 
+        public bool HasBarButtonItems
+        {
+            get
+            {
+                return _hasBarButtonItems;
+            }
+            set
+            {
+                _hasBarButtonItems = value;
+                if(_hasBarButtonItems)
+                {
+                    var items = new UIBarButtonCreator(this);
+                    bool animated = CreateBarButtonItems(items);
+                    if (items != null)
+                        this.NavigationItem.SetRightBarButtonItems(items.GetItems(), animated);
+                }
+            }
+        }
+
         #endregion
 
         #region ViewController Methods
@@ -98,8 +155,8 @@
             _keyboardObserver = NSNotificationCenter.DefaultCenter.AddObserver(new NSString("UIKeyboardWillChangeFrameNotification"),
                 (notification) =>
                 {
-                    CGRect keyboardEndFrame = ((NSValue)notification.UserInfo[UIKeyboard.FrameEndUserInfoKey]).CGRectValue;
                     CGRect keyboardBeginFrame = ((NSValue)notification.UserInfo[UIKeyboard.FrameBeginUserInfoKey]).CGRectValue;
+                    CGRect keyboardEndFrame = ((NSValue)notification.UserInfo[UIKeyboard.FrameEndUserInfoKey]).CGRectValue;                    
                     UIViewAnimationCurve animationCurve = (UIViewAnimationCurve)((NSNumber)notification.UserInfo[UIKeyboard.AnimationCurveUserInfoKey]).Int32Value;
                     int animationDuration = ((NSNumber)notification.UserInfo[UIKeyboard.AnimationDurationUserInfoKey]).Int32Value;
 
@@ -141,7 +198,7 @@
                     {
                         // Get View Controller view
                         UIView view = this.View;
-                        if (view != null && view.Frame.X == 0)
+                        if (view != null)
                         {
                             bool hasNavigationBar = this.NavigationController != null
                                 && this.NavigationController.NavigationBarHidden == false;
@@ -151,7 +208,8 @@
 
                             CGRect windowRect = view.Window.Frame;
 
-                            nfloat availableHeight = windowRect.Height - keyboardEndFrame.Height - navbarOffset;
+                            nfloat keyboardHeight = keyboardEndFrame.Y < keyboardBeginFrame.Y ? keyboardEndFrame.Height : 0f;
+                            nfloat availableHeight = windowRect.Height - keyboardHeight - navbarOffset;
 
                             UIView.BeginAnimations(null);
                             UIView.SetAnimationBeginsFromCurrentState(true);
@@ -172,7 +230,7 @@
                     {
                         // Get View Controller view
                         UIView view = this.View;
-                        if (view != null && view.Frame.X == 0)
+                        if (view != null)
                         {
                             // Get first responder
                             UIView responder = view.GetFirstResponder();
@@ -240,6 +298,16 @@
 
                     #endregion
                 });
+        }
+
+        public virtual bool CreateBarButtonItems(UIBarButtonCreator items)
+        {            
+            return false;
+        }
+
+        public virtual bool BarButtonItemSelected(int index)
+        {
+            return false;
         }
 
         public virtual void KeyboardWillShow()

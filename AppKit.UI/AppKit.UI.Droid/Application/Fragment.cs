@@ -22,6 +22,8 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Constants and Fields
 
+        private bool _notifyKeyboardStatus;
+
         private bool _isKeyboardVisible;
         
         #endregion
@@ -78,6 +80,14 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Fragment Methods
 
+        public override void OnStart()
+        {
+            base.OnStart();
+
+            if(_notifyKeyboardStatus)
+                this.View.ViewTreeObserver.GlobalLayout += ViewTreeObserver_GlobalLayout;
+        }
+        
         public virtual void OnKeyboardShow()
         {
 
@@ -95,9 +105,9 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Methods
 
-        protected void StartNotifyKeyboardStatus(View view)
+        protected void StartNotifyKeyboardStatus()
         {
-            view.ViewTreeObserver.GlobalLayout += ViewTreeObserver_GlobalLayout;
+            _notifyKeyboardStatus = true;            
         }
 
         protected void StopNotifyKeyboardStatus()

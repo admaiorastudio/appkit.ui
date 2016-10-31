@@ -107,8 +107,8 @@ namespace AdMaiora.AppKit.UI.App
         {
             Intent i = new Intent(this, activity);
 
-            if(extras != null)
-                i.Extras.PutAll(extras);
+            if (extras != null)
+                i.PutExtras(extras);
 
             StartActivity(i);
             Finish();

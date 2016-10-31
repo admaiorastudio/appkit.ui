@@ -8,11 +8,6 @@ namespace AdMaiora.AppKit.UI.App
     using Foundation;
     using UIKit;
     
-    public interface IBackButton
-    {
-        bool ViewWillPop();
-    }
-
     public class UIMainViewController : UIViewController
     {
         #region Inner Classes
@@ -90,8 +85,17 @@ namespace AdMaiora.AppKit.UI.App
             #endregion
         }
 
+        public virtual void RemoteNotification(UIBundle data)
+        {
+
+        }
+
         public virtual bool ShouldPopItem()
         {
+            UIViewController controller = this.ContentController.TopViewController;
+            if (controller is UISubViewController)
+                return !((UISubViewController)controller).BarButtonItemSelected(UISubViewController.BarButtonBack);
+
             return true;
         }
 
@@ -123,9 +127,13 @@ namespace AdMaiora.AppKit.UI.App
             UIMainViewController c = (UIMainViewController)Activator.CreateInstance(viewController);
 
             if (bundle != null)
-                bundle.PutAll(bundle);
+            {
+                c.Arguments = new UIBundle();
+                c.Arguments.PutAll(bundle);
+            }
 
             UIApplication.SharedApplication.Windows[0].RootViewController = c;
+            UIApplication.SharedApplication.Windows[0].MakeKeyAndVisible();
         }
 
         public void DismissKeyboard()

@@ -108,10 +108,9 @@ namespace AdMaiora.AppKit.UI
 
         public void Show()
         {
-            //UIWindow window = UIApplication.SharedApplication.Windows.Last();
             UIWindow window = new UIWindow(UIScreen.MainScreen.Bounds);
             window.BackgroundColor = UIColor.Clear;
-            window.WindowLevel = UIWindowLevel.Alert;
+            window.WindowLevel = UIApplication.SharedApplication.Windows.Last().WindowLevel + 1;
             window.RootViewController = UIApplication.SharedApplication.Windows[0].RootViewController;
             window.UserInteractionEnabled = false;
 
