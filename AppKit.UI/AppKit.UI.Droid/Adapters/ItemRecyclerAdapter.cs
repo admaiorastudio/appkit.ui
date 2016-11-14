@@ -18,12 +18,12 @@ namespace AdMaiora.AppKit.UI
         }
     }
 
-    public class ItemRecyclerAdapter<THolder, TItem> : RecyclerView.Adapter
+    public class ItemRecyclerAdapter<THolder, TItem> : RecyclerView.Adapter, View.IOnClickListener, View.IOnLongClickListener
         where THolder : ItemViewHolder
     {
         #region Constants and Fields
 
-        private Context _context;
+        private Android.Support.V4.App.Fragment _context;
 
         private int _viewLayoutID;
 
@@ -38,7 +38,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Constructors
 
-        public ItemRecyclerAdapter(Activity context, int viewLayoutID, IEnumerable<TItem> source)
+        public ItemRecyclerAdapter(Android.Support.V4.App.Fragment context, int viewLayoutID, IEnumerable<TItem> source)
         {
             _context = context;
 
@@ -86,14 +86,6 @@ namespace AdMaiora.AppKit.UI
             }
         }
 
-        protected Context Context
-        {
-            get
-            {
-                return _context;
-            }
-        }
-
         #endregion
 
         #region Public Methods
@@ -109,16 +101,19 @@ namespace AdMaiora.AppKit.UI
             return _sourceItems.IndexOf(item);
         }
 
-        public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
+        public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) 
         {
-            LayoutInflater inflater = LayoutInflater.From(parent.Context);
+            LayoutInflater inflater = LayoutInflater.From(_context.Context);
             Android.Views.View view = inflater.Inflate(_viewLayoutID, parent, false);
             view.Tag = ++_associationIndex;
-
-            GetViewCreated(view, parent);
-
+            view.Clickable = true;            
+            view.SetOnClickListener(this);
+            view.SetOnLongClickListener(this);                        
+            
             var vh =
                 Activator.CreateInstance(typeof(THolder), view) as RecyclerView.ViewHolder;
+
+            GetViewCreated(vh, view, parent);
 
             return vh;
         }
@@ -139,22 +134,49 @@ namespace AdMaiora.AppKit.UI
 
         public virtual void AddItem(TItem item)
         {
-            _sourceItems.Add(item);
-            NotifyDataSetChanged();
+            _sourceItems.Add(item);            
         }
 
         public virtual void InsertItem(int position, TItem item)
         {
-            _sourceItems.Insert(position, item);
-            NotifyDataSetChanged();
+            _sourceItems.Insert(position, item);            
+        }
+
+        public virtual void RemoveItem(TItem item)
+        {
+            _sourceItems.Remove(item);
         }
 
         public virtual void RemoveItem(int position)
         {
             _sourceItems.RemoveAt(position);
-            NotifyDataSetChanged();
         }
 
+        #endregion
+
+        #region View Methods
+
+        public void OnClick(View v)
+        {
+            ItemRecyclerView recyclerView = v.Parent as ItemRecyclerView;
+            if (recyclerView == null)
+                return;
+            
+            var item = GetItemFromView(v);
+            recyclerView.SelectItem(_sourceItems.IndexOf(item), item);
+        }
+
+        public bool OnLongClick(View v)
+        {
+            ItemRecyclerView recyclerView = v.Parent as ItemRecyclerView;
+            if (recyclerView == null)
+                return false;
+
+            var item = GetItemFromView(v);
+            recyclerView.LongPressItem(_sourceItems.IndexOf(item), item);
+
+            return true;
+        }
 
         #endregion
 
@@ -181,12 +203,12 @@ namespace AdMaiora.AppKit.UI
 
         protected void ExecuteCommand(View sender, string command, object userData)
         {
-            ItemListView listView = sender as ItemListView;
-            if (listView != null)
-                listView.ExecuteCommand(command, userData);
+            ItemRecyclerView recyclerView = sender as ItemRecyclerView;
+            if (recyclerView != null)
+                recyclerView.ExecuteCommand(command, userData);
         }
 
-        protected virtual void GetViewCreated(View view, ViewGroup parent)
+        protected virtual void GetViewCreated(RecyclerView.ViewHolder holder, View view, ViewGroup parent)
         {
             /* Do Nothing */
         }

@@ -98,6 +98,9 @@ namespace AdMaiora.AppKit.UI
 
         #endregion
 
+        #region Properties
+        #endregion
+
         #region Public Methods
 
         public static UIToast MakeText(string text, UIToastLength duration)
@@ -150,6 +153,10 @@ namespace AdMaiora.AppKit.UI
                 });
             });
         }
+
+        #endregion
+
+        #region Methods
 
         #endregion
     }

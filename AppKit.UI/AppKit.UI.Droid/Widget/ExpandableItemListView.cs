@@ -10,7 +10,8 @@ namespace AdMaiora.AppKit.UI
     {
         #region Event Handlers
 
-        public event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public new event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public event EventHandler<ItemListLongPressEventArgs> ItemLongPress;
         public event EventHandler<ItemListCommandEventArgs> ItemCommand;
 
         #endregion
@@ -58,16 +59,21 @@ namespace AdMaiora.AppKit.UI
                 adapter.NotifyDataSetChanged();
         }
 
-        public void SelectItem(int index, object item)
+        internal void SelectItem(int index, object item)
         {
             OnItemSelected(index, item);
         }
 
-        public void ExecuteCommand(string command, object userData)
+        internal void LongPressItem(int index, object item)
+        {
+            OnItemLongPress(index, item);
+        }
+
+        internal void ExecuteCommand(string command, object userData)
         {
             OnItemCommand(command, userData);
         }
-
+       
         #endregion
 
         #region Event Raising Methods
@@ -76,6 +82,12 @@ namespace AdMaiora.AppKit.UI
         {
             if (ItemSelected != null)
                 ItemSelected(this, new ItemListSelectEventArgs(index, item));
+        }
+
+        protected void OnItemLongPress(int index, object item)
+        {
+            if (ItemLongPress != null)
+                ItemLongPress(this, new ItemListLongPressEventArgs(index, item));
         }
 
         protected void OnItemCommand(string command, object userData)
@@ -89,26 +101,12 @@ namespace AdMaiora.AppKit.UI
         #region Methods
 
         private void Initialize()
-        {
-            this.ChildClick += ExpandableItemListView_ChildClick;
+        {            
         }
 
         #endregion
 
         #region Event Handlers
-
-        private void ExpandableItemListView_ChildClick(object sender, ExpandableListView.ChildClickEventArgs e)
-        {
-            var o = this.ExpandableListAdapter.GetChild(e.GroupPosition, e.ChildPosition);
-            var h = o as JavaHolder;
-            if (h == null)
-                return;
-
-            var item = h.Instance;
-
-            SelectItem(e.ChildPosition, item);
-        }
-
         #endregion
     }
 }

@@ -7,11 +7,11 @@ namespace AdMaiora.AppKit.UI
     using Android.Views;
     using Android.Widget;
 
-    public abstract class ItemListAdapter<T> : BaseAdapter<T>
+    public abstract class ItemListAdapter<T> : BaseAdapter<T>, View.IOnClickListener, View.IOnLongClickListener
     {
         #region Constants and Fields
 
-        private Context _context;
+        private Android.Support.V4.App.Fragment _context;
 
         private int _cellLayoutID;
 
@@ -26,7 +26,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Constructor and Destructor
 
-        public ItemListAdapter(Activity context, int cellLayoutID, IEnumerable<T> source)
+        public ItemListAdapter(Android.Support.V4.App.Fragment context, int cellLayoutID, IEnumerable<T> source)
         {
             _context = context;
 
@@ -74,14 +74,6 @@ namespace AdMaiora.AppKit.UI
             }
         }
 
-        protected Context Context
-        {
-            get
-            {
-                return _context;
-            }
-        }
-
         #endregion
 
         #region Public Methods
@@ -114,9 +106,12 @@ namespace AdMaiora.AppKit.UI
             View view = convertView;
             if (view == null && _cellLayoutID != -1)
             {
-                LayoutInflater inflater = (LayoutInflater)this.Context.GetSystemService(Context.LayoutInflaterService);
+                LayoutInflater inflater = LayoutInflater.From(_context.Context);
                 view = inflater.Inflate(_cellLayoutID, parent, false);
                 view.Tag = ++_associationIndex;
+                view.Clickable = true;
+                view.SetOnClickListener(this);
+                view.SetOnLongClickListener(this);
 
                 _associatedItems[(int)view.Tag] = item;
 
@@ -138,22 +133,51 @@ namespace AdMaiora.AppKit.UI
         public virtual void AddItem(T item)
         {
             _sourceItems.Add(item);
-            NotifyDataSetChanged();
         }
 
         public virtual void InsertItem(int position, T item)
         {
             _sourceItems.Insert(position, item);
-            NotifyDataSetChanged();
+        }
+
+        public virtual void RemoveItem(T item)
+        {
+            _sourceItems.Remove(item);
         }
 
         public virtual void RemoveItem(int position)
         {
             _sourceItems.RemoveAt(position);
-            NotifyDataSetChanged();
         }
 
         #endregion
+
+        #region View Methods
+
+        public void OnClick(View v)
+        {
+            ItemListView listView = v.Parent as ItemListView;
+            if (listView == null)
+                return;
+
+            var item = GetItemFromView(v);
+            listView.SelectItem(_sourceItems.IndexOf(item), item);
+        }
+
+        public bool OnLongClick(View v)
+        {
+            ItemListView listView = v.Parent as ItemListView;
+            if (listView == null)
+                return false;
+
+            var item = GetItemFromView(v);
+            listView.LongPressItem(_sourceItems.IndexOf(item), item);
+
+            return true;
+        }
+
+        #endregion
+
 
         #region Methods
 

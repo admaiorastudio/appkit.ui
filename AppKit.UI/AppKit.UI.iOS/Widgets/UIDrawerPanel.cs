@@ -31,7 +31,7 @@
 
         #endregion
 
-        #region Constructors and Destructors
+        #region Constructors
 
         public UIDrawerPanel(CGRect frame)
             : base(frame)

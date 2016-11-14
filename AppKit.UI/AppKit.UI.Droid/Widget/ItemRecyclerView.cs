@@ -5,6 +5,7 @@ namespace AdMaiora.AppKit.UI
     using Android.Content;
     using Android.Util;
     using Android.Widget;
+    using Android.Views;
     using Android.Support.V7.Widget;
 
     public class ItemRecyclerView : Android.Support.V7.Widget.RecyclerView
@@ -12,6 +13,7 @@ namespace AdMaiora.AppKit.UI
         #region Event Handlers
 
         public event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public event EventHandler<ItemListLongPressEventArgs> ItemLongPress;
         public event EventHandler<ItemListCommandEventArgs> ItemCommand;
 
         #endregion
@@ -59,12 +61,17 @@ namespace AdMaiora.AppKit.UI
                 adapter.NotifyDataSetChanged();
         }
 
-        public void SelectItem(int index, object item)
+        internal void SelectItem(int index, object item)
         {
             OnItemSelected(index, item);
         }
 
-        public void ExecuteCommand(string command, object userData)
+        internal void LongPressItem(int index, object item)
+        {
+            OnItemLongPress(index, item);
+        }
+
+        internal void ExecuteCommand(string command, object userData)
         {
             OnItemCommand(command, userData);
         }
@@ -77,6 +84,12 @@ namespace AdMaiora.AppKit.UI
         {
             if (ItemSelected != null)
                 ItemSelected(this, new ItemListSelectEventArgs(index, item));
+        }
+
+        protected void OnItemLongPress(int index, object item)
+        {
+            if (ItemLongPress != null)
+                ItemLongPress(this, new ItemListLongPressEventArgs(index, item));
         }
 
         protected void OnItemCommand(string command, object userData)
@@ -92,6 +105,7 @@ namespace AdMaiora.AppKit.UI
         private void Initialize()
         {
             SetLayoutManager(new LinearLayoutManager(this.Context));
+            
         }
 
         #endregion

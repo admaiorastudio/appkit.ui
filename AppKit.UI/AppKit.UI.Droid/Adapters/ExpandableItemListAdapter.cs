@@ -8,11 +8,11 @@ namespace AdMaiora.AppKit.UI
     using Android.Views;
     using Android.Widget;
 
-    public abstract class ExpandableItemListAdapter<TGroup, TChild> : BaseExpandableListAdapter
+    public abstract class ExpandableItemListAdapter<TGroup, TChild> : BaseExpandableListAdapter, View.IOnClickListener, View.IOnLongClickListener
     {
         #region Constants and Fields
 
-        private Activity _context;
+        private Android.Support.V4.App.Fragment _context;
 
         private int _parentLayoutID;
         private int _childLayoutID;
@@ -21,13 +21,14 @@ namespace AdMaiora.AppKit.UI
 
         // This dictionary preserve a map to View hash code and 
         // an associate item, to be used later when the method GetItemForView needs it
+        private int _associationIndex;
         private Dictionary<int, TChild> _associatedItems;
 
         #endregion
 
         #region Constructor and Destructor
 
-        public ExpandableItemListAdapter(Activity context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TChild>> groups)
+        public ExpandableItemListAdapter(Android.Support.V4.App.Fragment context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TChild>> groups)
         {
             _context = context;
 
@@ -40,8 +41,8 @@ namespace AdMaiora.AppKit.UI
                 _sourceItems.Add(new KeyValuePair<TGroup, IList<TChild>>(grouping.Key, new List<TChild>(grouping)));
             }
 
+            _associationIndex = 0;
             _associatedItems = new Dictionary<int, TChild>();
-
         }
 
         #endregion
@@ -73,14 +74,6 @@ namespace AdMaiora.AppKit.UI
             get
             {
                 return true;
-            }
-        }
-
-        protected Activity Activity
-        {
-            get
-            {
-                return _context;
             }
         }
 
@@ -139,7 +132,7 @@ namespace AdMaiora.AppKit.UI
 
             if (view == null && _parentLayoutID != -1)
             {
-                LayoutInflater inflater = (LayoutInflater)this.Activity.GetSystemService(Context.LayoutInflaterService);
+                LayoutInflater inflater = LayoutInflater.From(_context.Context);
                 view = inflater.Inflate(_parentLayoutID, parent, false);
 
                 GetGroupViewCreated(view, parent);
@@ -156,16 +149,20 @@ namespace AdMaiora.AppKit.UI
 
             if (view == null && _childLayoutID != -1)
             {
-                LayoutInflater inflater = (LayoutInflater)this.Activity.GetSystemService(Activity.LayoutInflaterService);
+                LayoutInflater inflater = LayoutInflater.From(_context.Context);
                 view = inflater.Inflate(_childLayoutID, null);
+                view.Tag = ++_associationIndex;
+                view.Clickable = true;
+                view.SetOnClickListener(this);
+                view.SetOnLongClickListener(this);
 
-                _associatedItems[view.GetHashCode()] = item;
+                _associatedItems[(int)view.Tag] = item;
 
                 GetChildViewCreated(view, parent);
             }
             else
             {
-                _associatedItems[view.GetHashCode()] = item;
+                _associatedItems[(int)view.Tag] = item;
             }
 
             return GetChildView(groupPosition, childPosition, isLastChild, item, view, parent);
@@ -184,13 +181,47 @@ namespace AdMaiora.AppKit.UI
         public virtual void AddItem(int groupPosition, TChild item)
         {
             _sourceItems[groupPosition].Value.Add(item);
-            NotifyDataSetChanged();
+        }
+
+        public virtual void InsertItem(int groupPosition, int position, TChild item)
+        {
+            _sourceItems[groupPosition].Value.Insert(position, item);
         }
 
         public virtual void RemoveItem(int groupPosition, int position, TChild item)
         {
             _sourceItems[groupPosition].Value.Remove(item);
-            NotifyDataSetChanged();
+        }
+
+        public virtual void RemoveItem(int groupPosition, int position)
+        {
+            _sourceItems[groupPosition].Value.RemoveAt(position);
+        }
+
+        #endregion
+
+        #region View Methods
+
+        public void OnClick(View v)
+        {
+            ExpandableItemListView listView = v.Parent as ExpandableItemListView;
+            if (listView == null)
+                return;
+
+            var item = GetItemFromView(v);
+            listView.SelectItem(GetItemIndex(item), item);
+        }
+
+        public bool OnLongClick(View v)
+        {
+            ExpandableItemListView listView = v.Parent as ExpandableItemListView;
+            if (listView == null)
+                return false;
+
+            var item = GetItemFromView(v);
+            listView.LongPressItem(GetItemIndex(item), item);
+
+            return true;
         }
 
         #endregion
@@ -201,9 +232,10 @@ namespace AdMaiora.AppKit.UI
         {
             while (view != null)
             {
-                if (_associatedItems.ContainsKey(view.GetHashCode()))
+                int associatedIndex = (int)view.Tag;
+                if (_associatedItems.ContainsKey(associatedIndex))
                 {
-                    object instance = _associatedItems[view.GetHashCode()];
+                    object instance = _associatedItems[associatedIndex];
 
                     if (instance is TChild)
                         return (TChild)instance;
@@ -230,6 +262,23 @@ namespace AdMaiora.AppKit.UI
         protected virtual void GetChildViewCreated(View convertView, ViewGroup parent)
         {
             /* Do Nothing */
+        }
+
+        private int GetItemIndex(TChild item)
+        {
+            int index = -1;
+            foreach(var kvp in _sourceItems)
+            {
+                index++;
+                foreach(var i in kvp.Value)
+                {
+                    index++;
+                    if (i.GetHashCode() == item.GetHashCode())
+                        return index;
+                }               
+            }
+
+            return -1;
         }
 
         #endregion

@@ -5,10 +5,32 @@ namespace AdMaiora.AppKit.UI
     using Android.Content;
     using Android.Util;
     using Android.Widget;
+    using Android.Views;
 
     public class ItemListSelectEventArgs : EventArgs
     {
         public ItemListSelectEventArgs(int index, object item)
+        {
+            this.Index = index;
+            this.Item = item;
+        }
+
+        public int Index
+        {
+            get;
+            private set;
+        }
+
+        public object Item
+        {
+            get;
+            private set;
+        }
+    }
+
+    public class ItemListLongPressEventArgs : EventArgs
+    {
+        public ItemListLongPressEventArgs(int index, object item)
         {
             this.Index = index;
             this.Item = item;
@@ -53,6 +75,7 @@ namespace AdMaiora.AppKit.UI
         #region Event Handlers
 
         public new event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public event EventHandler<ItemListLongPressEventArgs> ItemLongPress;
         public event EventHandler<ItemListCommandEventArgs> ItemCommand;
 
         #endregion
@@ -100,12 +123,17 @@ namespace AdMaiora.AppKit.UI
                 adapter.NotifyDataSetChanged();
         }
 
-        public void SelectItem(int index, object item)
+        internal void SelectItem(int index, object item)
         {
             OnItemSelected(index, item);
         }
 
-        public void ExecuteCommand(string command, object userData)
+        internal void LongPressItem(int index, object item)
+        {
+            OnItemLongPress(index, item);
+        }
+
+        internal void ExecuteCommand(string command, object userData)
         {
             OnItemCommand(command, userData);
         }
@@ -120,37 +148,29 @@ namespace AdMaiora.AppKit.UI
                 ItemSelected(this, new ItemListSelectEventArgs(index, item));
         }
 
+        protected void OnItemLongPress(int index, object item)
+        {
+            if (ItemLongPress != null)
+                ItemLongPress(this, new ItemListLongPressEventArgs(index, item));
+        }
+
         protected void OnItemCommand(string command, object userData)
         {
             if (ItemCommand != null)
                 ItemCommand(this, new ItemListCommandEventArgs(command, userData));
         }
-
+        
         #endregion
 
         #region Methods
 
         private void Initialize()
-        {
-            this.ItemClick += ItemListView_ItemClick;
+        {      
         }
 
         #endregion
 
         #region Event Handlers
-
-        private void ItemListView_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            var o = this.Adapter.GetItem(e.Position);
-            var h = o as JavaHolder;
-            if (h == null)
-                return;
-
-            var item = h.Instance;
-
-            SelectItem(e.Position, item);
-        }
-
         #endregion
     }
 }

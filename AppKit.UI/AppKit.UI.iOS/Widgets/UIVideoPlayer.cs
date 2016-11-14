@@ -11,6 +11,8 @@
     [Register("UIVideoPlayer")]
     public class UIVideoPlayer : UIView
     {
+        #region Constants and Fields
+
         private AVPlayer _mediaPlayer;
         private AVPlayerLayer _playerLayer;
 
@@ -18,6 +20,10 @@
 
         public event EventHandler ReadyToPlay;
         public event EventHandler FinishedPlaying;
+
+        #endregion
+
+        #region Constructors
 
         public UIVideoPlayer(RectangleF frame)
             : base(frame)
@@ -30,6 +36,10 @@
         {
             Initialize();
         }
+
+        #endregion
+
+        #region Properties
 
         public bool Looping
         {
@@ -88,6 +98,10 @@
                 return _mediaPlayer.Rate > 0f;
             }
         }
+
+        #endregion
+
+        #region Public Methods
 
         public void SetVideoURL(NSUrl url)
         {
@@ -151,7 +165,11 @@
             if (_mediaPlayer.Status == AVPlayerStatus.ReadyToPlay)
                 OnReadyToPlay();
         }
-            
+
+        #endregion
+
+        #region Event Raising Methods
+
         protected void OnReadyToPlay()
         {
             if (ReadyToPlay != null)
@@ -163,6 +181,10 @@
             if (FinishedPlaying != null)
                 FinishedPlaying(this, EventArgs.Empty);
         }
+
+        #endregion
+
+        #region Methods
 
         private void Initialize()
         {
@@ -182,6 +204,7 @@
             _mediaPlayer.AddObserver(this, "status");
         }
 
+        #endregion
     }
 }
 

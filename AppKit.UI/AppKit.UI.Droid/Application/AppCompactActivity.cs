@@ -13,17 +13,14 @@ namespace AdMaiora.AppKit.UI.App
     using Android.Widget;
     using Android.Views.InputMethods;
 
-    public interface IBackButton
-    {
-        bool OnBackButton();
-    }
-
     public class AppCompactActivity : Android.Support.V7.App.AppCompatActivity
     {
         #region Inner Classes
         #endregion
 
         #region Constants and Fields
+
+        private int _contentLayoutResID;
 
         private Bundle _extras;
 
@@ -39,6 +36,7 @@ namespace AdMaiora.AppKit.UI.App
 
         public AppCompactActivity()
         {
+            _contentLayoutResID = -1;
         }
 
         #endregion
@@ -71,17 +69,36 @@ namespace AdMaiora.AppKit.UI.App
         #endregion
 
         #region Activity Methods
+
+        public override void OnBackPressed()
+        {
+            if (_contentLayoutResID != -1)
+            {
+                var f = this.SupportFragmentManager.FindFragmentById(_contentLayoutResID);
+                if (f is AdMaiora.AppKit.UI.App.Fragment)
+                {
+                    if (((AdMaiora.AppKit.UI.App.Fragment)f).OnBackButton())
+                        return;
+                }
+            }
+
+            base.OnBackPressed();
+        }
+
         #endregion
 
         #region Public Methods
         #endregion
 
         #region Methods
-        
-        protected void SetContentView(int layoutResID, int toolBarResId = 0)
+
+        protected void SetContentView(int layoutResID, int contentLayoutResID = 0, int toolBarResId = 0)
         {
             base.SetContentView(layoutResID);
             ViewBuilder.GetWidgets(this);
+
+            if(contentLayoutResID != 0)
+                _contentLayoutResID = contentLayoutResID;
 
             if (toolBarResId != 0)
             {

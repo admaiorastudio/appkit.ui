@@ -5,6 +5,7 @@
 
     using Foundation;
     using UIKit;
+    using CoreGraphics;
 
     public abstract class UIItemListViewSource<T> : UITableViewSource
     {
@@ -18,14 +19,15 @@
 
         // This dictionary preserve a map to UITableViewCell hash code and 
         // an associate item, to be used later when the method GetItemForView needs it
-        private Dictionary<nint, T> _associatedItems;
-		private nint _associatedIndex;
+        private nint _associatedIndex;
+        private Dictionary<nint, T> _associatedItems;		
 
         #endregion
 
         #region Constructors and Destructors
 
         public UIItemListViewSource(UIViewController viewController, string cellLayout, IEnumerable<T> source)
+            : base()
         {
             _viewController = viewController;
 
@@ -33,8 +35,8 @@
 
             _sourceItems = new List<T>(source);
 
-            _associatedItems = new Dictionary<nint, T>();
-			_associatedIndex = 0;
+            _associatedIndex = 0;
+            _associatedItems = new Dictionary<nint, T>();			
         }
 
         #endregion
@@ -110,10 +112,26 @@
             {
                 NSBundle bundle = NSBundle.MainBundle;
                 view = bundle.LoadNib(_cellLayout, this, null).GetItem<UITableViewCell>(0);
-
 				view.Tag = ++_associatedIndex;
 
-				_associatedItems.Add(view.Tag, item);
+                var lpgr = new UILongPressGestureRecognizer(
+                    (r) =>
+                    {
+                        if (r.State == UIGestureRecognizerState.Began)
+                        {
+                            //CGPoint p = r.LocationInView(tableView);
+                            NSIndexPath ip = tableView.IndexPathForCell(view);
+                            if (ip == null)
+                                return;
+
+                            LongPress(tableView, ip);
+                        }
+                    });
+
+                lpgr.MinimumPressDuration = 1.0;
+                view.AddGestureRecognizer(lpgr);
+
+                _associatedItems.Add(view.Tag, item);
                 GetViewCreated(tableView, view);
             }
             else
@@ -135,8 +153,15 @@
             if (listView != null)
 				listView.SelectItem(GetSourceIndexFromIndexPath(tableView, indexPath), _sourceItems[GetSourceIndexFromIndexPath(tableView, indexPath)]);
         }
+        
+        public void LongPress(UITableView tableView, NSIndexPath indexPath)
+        {
+            UIItemListView listView = tableView as UIItemListView;
+            if (listView != null)
+                listView.LongPressItem(GetSourceIndexFromIndexPath(tableView, indexPath), _sourceItems[GetSourceIndexFromIndexPath(tableView, indexPath)]);
+        }
 
-		public override void Scrolled(UIScrollView scrollView)
+        public override void Scrolled(UIScrollView scrollView)
 		{
 			UIItemListView listView = scrollView as UIItemListView;
 			if (listView != null)
@@ -162,6 +187,11 @@
             _sourceItems.Add(item);
         }
 
+        public virtual void RemoveItem(T item)
+        {
+            _sourceItems.Remove(item);
+        }
+
         public virtual void RemoveItem(int position)
         {
             _sourceItems.RemoveAt(position);
@@ -182,9 +212,10 @@
         {
             while (view != null)
             {
-				if(_associatedItems.ContainsKey(view.Tag))    
+                nint associatedIndex = view.Tag;
+				if(_associatedItems.ContainsKey(associatedIndex))    
                 {
-					object instance = _associatedItems[view.Tag];
+					object instance = _associatedItems[associatedIndex];
 
                     if (instance is T)
                         return (T)instance;
@@ -201,12 +232,18 @@
             /* Do Nothing */
         }
 
-		protected int GetSourceIndexFromIndexPath(UITableView tableView, NSIndexPath indexPath)
-		{
-			int index = 0;
-			for (int i = 0; i < indexPath.Section; index += (int)this.RowsInSection(tableView, i++));
-			return index + indexPath.Row;
-		}
+        private int GetSourceIndexFromIndexPath(UITableView tableView, NSIndexPath indexPath)
+        {
+            int index = 0;
+            for (int i = 0; i < indexPath.Section; index += (int)this.RowsInSection(tableView, i++)) ;
+            return index + indexPath.Row;
+        }
+
+        public object GetSourceItemFromIndexPath(UITableView tableView, NSIndexPath indexPath)
+        {
+            int index = GetSourceIndexFromIndexPath(tableView, indexPath);
+            return this.SourceItems[index];
+        }
 
         #endregion
     }

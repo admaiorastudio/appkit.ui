@@ -54,6 +54,7 @@
     <Compile Include="Extensions\UINavigationControllerExtension.cs" />
     <Compile Include="Extensions\UINavigationItem.cs" />
     <Compile Include="Extensions\UIPickerViewExtension.cs" />
+    <Compile Include="Extensions\UITextViewExtension.cs" />
     <Compile Include="Extensions\UITextFieldExtension.cs" />
     <Compile Include="Extensions\UIViewExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

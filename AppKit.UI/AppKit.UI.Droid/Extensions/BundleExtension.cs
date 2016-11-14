@@ -1,4 +1,4 @@
-namespace AdMaiora.AppKit.UI.Extensions
+namespace AdMaiora.AppKit.UI
 {
     using System;
     using System.Collections.Generic;
@@ -22,6 +22,7 @@ namespace AdMaiora.AppKit.UI.Extensions
         {
             bundle.PutString(key, String.Concat(value.Ticks, ",", value.Kind));
         }
+
         public static DateTime GetDateTime(this Bundle bundle, string key, DateTime defaultValue)
         {
             string dateDescription = bundle.GetString(key, null);
@@ -32,6 +33,7 @@ namespace AdMaiora.AppKit.UI.Extensions
             DateTimeKind kind = (DateTimeKind)Int32.Parse(dateDescription.Split(',')[1]);
             return new DateTime(ticks, kind);               
         }
+
         public static DateTime GetDateTime(this Bundle bundle, string key)
         {
             return GetDateTime(bundle, key, default(DateTime));

@@ -98,66 +98,66 @@ namespace AdMaiora.AppKit.UI
 
     }
 
-    public class GestureRecogniser : GestureDetector.SimpleOnGestureListener
+    public class GestureListener : GestureDetector.SimpleOnGestureListener, View.IOnTouchListener
     {
         #region Constants and Fields
 
         private const int SWIPE_THRESHOLD = 100;
         private const int SWIPE_VELOCITY_THRESHOLD = 100;
-
-        private EventHandler<View.TouchEventArgs> _eventHandler;
+        
         private  GestureDetector _gestureDetector;
+
+        private Action<MotionEventArgs> WhenDown;
+        private Action<MotionEventArgs> WhenSingleTapUp;
+        private Action<PressEventArgs> WhenLongPress;
+        private Action<PressEventArgs> WhenShowPress;
+        private Action<FlingEventArgs> WhenFling;
+        private Action<FlingEventArgs> WhenScroll;
 
         #endregion
 
         #region Events
 
-        public event EventHandler<MotionEventArgs> Down;
-        public event EventHandler<MotionEventArgs> SingleTapUp;
-        public event EventHandler<PressEventArgs> LongPress;
-        public event EventHandler<PressEventArgs> ShowPress;
-        public event EventHandler<FlingEventArgs> Fling;
-        public event EventHandler<FlingEventArgs> Scroll;
-
         #endregion
 
         #region Constructors and Destructors
 
-        public GestureRecogniser(Context context)
+        public GestureListener(Context context)
         {
             _gestureDetector = new GestureDetector(context, this);
-            _eventHandler = (sender, e) =>
-            {
-                _gestureDetector.OnTouchEvent(e.Event);
-            };
         }
 
-        public static GestureRecogniser ForDown(Context context, EventHandler<MotionEventArgs> down) { GestureRecogniser g = new GestureRecogniser(context); g.Down += down; return g; }
-        public static GestureRecogniser ForSingleTapUp(Context context, EventHandler<MotionEventArgs> tap) { GestureRecogniser g = new GestureRecogniser(context); g.SingleTapUp += tap; return g; }
-        public static GestureRecogniser ForLongPress(Context context, EventHandler<PressEventArgs> longTap) { GestureRecogniser g = new GestureRecogniser(context); g.LongPress += longTap; return g; }
-        public static GestureRecogniser ForShowPress(Context context, EventHandler<PressEventArgs> shwoPress) { GestureRecogniser g = new GestureRecogniser(context); g.ShowPress += shwoPress; return g; }
-        public static GestureRecogniser ForFling(Context context, EventHandler<FlingEventArgs> fling) { GestureRecogniser g = new GestureRecogniser(context); g.Fling += fling; return g; }
-        public static GestureRecogniser ForScroll(Context context, EventHandler<FlingEventArgs> scroll) { GestureRecogniser g = new GestureRecogniser(context); g.Scroll += scroll; return g; }
+        public static GestureListener ForDown(Context context, Action<MotionEventArgs> down) { GestureListener g = new GestureListener(context); g.WhenDown = down; return g; }
+        public static GestureListener ForSingleTapUp(Context context, Action<MotionEventArgs> tap) { GestureListener g = new GestureListener(context); g.WhenSingleTapUp = tap; return g; }
+        public static GestureListener ForLongPress(Context context, Action<PressEventArgs> longTap) { GestureListener g = new GestureListener(context); g.WhenLongPress = longTap; return g; }
+        public static GestureListener ForShowPress(Context context, Action<PressEventArgs> shwoPress) { GestureListener g = new GestureListener(context); g.WhenShowPress = shwoPress; return g; }
+        public static GestureListener ForFling(Context context, Action<FlingEventArgs> fling) { GestureListener g = new GestureListener(context); g.WhenFling = fling; return g; }
+        public static GestureListener ForScroll(Context context, Action<FlingEventArgs> scroll) { GestureListener g = new GestureListener(context); g.WhenScroll = scroll; return g; }
 
         #endregion
 
         #region Methods
 
-        public static implicit operator EventHandler<View.TouchEventArgs>(GestureRecogniser g)
+        #endregion
+
+        #region View Methods
+
+        public bool OnTouch(View v, MotionEvent e)
         {
-            return g._eventHandler;
+            return _gestureDetector.OnTouchEvent(e);  
         }
 
         #endregion
 
-        #region Event Raising Methods
+        #region GestureDetector.SimpleOnGestureListener Methods
 
         public override bool OnDown(MotionEvent e)
+
         {
-            if (Down != null)
+            if (WhenDown != null)
             {
                 var args = new MotionEventArgs(false, e);
-                Down(this, args);
+                WhenDown(args);
                 return args.Handled;
             }
             return false;
@@ -165,28 +165,28 @@ namespace AdMaiora.AppKit.UI
 
         public override void OnLongPress(MotionEvent e)
         {
-            if (LongPress != null)
+            if (WhenLongPress != null)
             {
                 var args = new PressEventArgs(e);
-                LongPress(this, args);
+                WhenLongPress(args);
             }
         }
 
         public override void OnShowPress(MotionEvent e)
         {
-            if (ShowPress != null)
+            if (WhenShowPress != null)
             {
                 var args = new PressEventArgs(e);
-                ShowPress(this, args);
+                WhenShowPress(args);
             }
         }
 
         public override bool OnSingleTapUp(MotionEvent e)
         {
-            if (SingleTapUp != null)
+            if (WhenSingleTapUp != null)
             {
                 var args = new MotionEventArgs(false, e);
-                SingleTapUp(this, args);
+                WhenSingleTapUp(args);
                 return args.Handled;
             }
             return false;
@@ -194,7 +194,7 @@ namespace AdMaiora.AppKit.UI
 
         public override bool OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
         {
-            if (Fling != null)
+            if (WhenFling != null)
             {
                 FlingDirection direction = FlingDirection.Unknown;
                 try
@@ -234,7 +234,7 @@ namespace AdMaiora.AppKit.UI
                 }
 
                 var args = new FlingEventArgs(false, e1, e2, velocityX, velocityY, direction);
-                Fling(this, args);
+                WhenFling(args);
                 return args.Handled;
             }
 
@@ -243,10 +243,10 @@ namespace AdMaiora.AppKit.UI
 
         public override bool OnScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
         {
-            if (Scroll != null)
+            if (WhenScroll != null)
             {
                 var args = new FlingEventArgs(false, e1, e2, distanceX, distanceY, FlingDirection.Unknown);
-                Scroll(this, args);
+                WhenScroll(args);
                 return args.Handled;
             }
             return false;

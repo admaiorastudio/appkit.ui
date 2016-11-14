@@ -18,7 +18,8 @@
 
         // This dictionary preserve a map to UITableViewCell hash code and 
         // an associate item, to be used later when the method GetItemForView needs it
-        private Dictionary<int, T> _associatedItems;
+        private nint _associatedIndex;
+        private Dictionary<nint, T> _associatedItems;
 
         #endregion
 
@@ -32,7 +33,8 @@
 
             _sourceItems = new List<T>(source);
 
-            _associatedItems = new Dictionary<int, T>();
+            _associatedIndex = 0;
+            _associatedItems = new Dictionary<nint, T>();
         }
 
         #endregion
@@ -98,23 +100,41 @@
         {
             return _sourceItems.Count;
         }
-            
+                    
         public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
             T item = _sourceItems[indexPath.Row];
-                       
-            collectionView.RegisterNibForCell(UINib.FromName(_cellLayout, NSBundle.MainBundle), new NSString(_cellLayout));
-            UICollectionViewCell view = (UICollectionViewCell)collectionView.DequeueReusableCell(new NSString(_cellLayout), indexPath);
-            if (String.IsNullOrEmpty(view.RestorationIdentifier))
-            {
-                view.RestorationIdentifier = indexPath.ToString();
 
-                _associatedItems.Add(view.GetHashCode(), item);
+            UICollectionViewCell view = (UICollectionViewCell)collectionView.DequeueReusableCell(_cellLayout, indexPath);
+            if (view == null)
+            {
+                NSBundle bundle = NSBundle.MainBundle;
+                view = bundle.LoadNib(_cellLayout, this, null).GetItem<UICollectionViewCell>(0);
+				view.Tag = ++_associatedIndex;
+
+                var lpgr = new UILongPressGestureRecognizer(
+                    (r) =>
+                    {
+                        if (r.State == UIGestureRecognizerState.Began)
+                        {
+                            //CGPoint p = r.LocationInView(tableView);
+                            NSIndexPath ip = collectionView.IndexPathForCell(view);
+                            if (ip == null)
+                                return;
+
+                            LongPress(collectionView, ip);
+                        }
+                    });
+
+                lpgr.MinimumPressDuration = 1.0;
+                view.AddGestureRecognizer(lpgr);
+
+                _associatedItems.Add(view.Tag, item);
                 GetViewCreated(collectionView, view);
             }
             else
-            {               
-                _associatedItems[view.GetHashCode()] = item;
+            {
+				_associatedItems[view.Tag] = item;
             }
 
             return GetCell(collectionView, indexPath, view, item);
@@ -132,6 +152,13 @@
                 listView.SelectItem(indexPath.Row, _sourceItems[indexPath.Row]);
 
             return true;
+        }
+
+        public void LongPress(UICollectionView tableView, NSIndexPath indexPath)
+        {
+            UIItemCollectionView listView = tableView as UIItemCollectionView;
+            if (listView != null)
+                listView.LongPressItem(indexPath.Row, _sourceItems[indexPath.Row]);
         }
 
         public override void Scrolled(UIScrollView scrollView)
@@ -160,11 +187,16 @@
             _sourceItems.Add(item);
         }
 
+        public virtual void RemoveItem(T item)
+        {
+            _sourceItems.Remove(item);
+        }
+
         public virtual void RemoveItem(int position)
         {
             _sourceItems.RemoveAt(position);
         }
-            
+
         #endregion
 
         #region Methods
@@ -180,9 +212,10 @@
         {
             while (view != null)
             {
-                if(_associatedItems.ContainsKey(view.GetHashCode()))    
+                nint associatedIndex = view.Tag;
+                if(_associatedItems.ContainsKey(associatedIndex))    
                 {
-                    object instance = _associatedItems[view.GetHashCode()];
+                    object instance = _associatedItems[associatedIndex];
 
                     if (instance is T)
                         return (T)instance;

@@ -25,10 +25,14 @@ namespace AdMaiora.AppKit.UI.App
         private bool _notifyKeyboardStatus;
 
         private bool _isKeyboardVisible;
-        
+
+        private bool _preseveViewWhenInBackStack;
+
+        private View _view;
+
         #endregion
 
-        #region Widgets
+        #region Widgets        
         #endregion
 
         #region Constructors
@@ -76,9 +80,58 @@ namespace AdMaiora.AppKit.UI.App
             }
         }
 
+        public string Title
+        {
+            get
+            {
+                var actionBar = this.ActionBar;
+                if (actionBar == null)
+                    return null;
+
+                return actionBar.Title;
+            }
+            set
+            {
+                var actionBar = this.ActionBar;
+                if (actionBar == null)
+                    return;
+
+                actionBar.Title = value;
+            }
+        }
+
         #endregion
 
         #region Fragment Methods
+
+        public override void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
+
+            _preseveViewWhenInBackStack = false;
+            _view = null;
+        }
+
+        public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        {
+            // WARNING SPERIMENTAL
+            //
+            // We're using this approach to keep View refrence alive when fragment is stored in back stack
+            // http://stackoverflow.com/questions/11353075/how-can-i-maintain-fragment-state-when-added-to-the-back-stack
+            // If you don't want this feature override this method!
+
+            OnCreateView(inflater, container);
+
+            if (_view == null)
+                throw new InvalidOperationException("You need to set the current fragment layout using the 'SetContentView' method.");
+
+            return _view;
+        }
+
+        public virtual void OnCreateView(LayoutInflater inflater, ViewGroup container)
+        {
+            // Load your view using the SetContentView method
+        }
 
         public override void OnStart()
         {
@@ -87,7 +140,7 @@ namespace AdMaiora.AppKit.UI.App
             if(_notifyKeyboardStatus)
                 this.View.ViewTreeObserver.GlobalLayout += ViewTreeObserver_GlobalLayout;
         }
-        
+
         public virtual void OnKeyboardShow()
         {
 
@@ -98,12 +151,60 @@ namespace AdMaiora.AppKit.UI.App
 
         }
 
+        public override bool OnOptionsItemSelected(IMenuItem item)
+        {
+            switch(item.ItemId)
+            {
+                case Android.Resource.Id.Home:
+                    this.Activity.OnBackPressed();
+                    return true;
+
+                default:
+                    return base.OnOptionsItemSelected(item);
+            }            
+        }
+
+        public virtual bool OnBackButton()
+        {
+            return false;
+        }
+
+        public override void OnDestroyView()
+        {
+            if (_preseveViewWhenInBackStack)
+            {
+                if (_view.Parent != null)
+                    ((ViewGroup)_view.Parent).RemoveView(_view);
+            }
+            
+            base.OnDestroyView();
+        }
+
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if(_preseveViewWhenInBackStack)
+            {
+                _preseveViewWhenInBackStack = false;
+                _view = null;                
+            }                
+        }
+
         #endregion
 
         #region Public Methods
         #endregion
 
         #region Methods
+
+        protected void SetContentView(int layoutResID, LayoutInflater inflater, ViewGroup container)
+        {
+            _preseveViewWhenInBackStack = true;
+
+            if(_view == null)
+                _view = inflater.InflateWithWidgets(layoutResID, this, container, false);
+        }
 
         protected void StartNotifyKeyboardStatus()
         {

@@ -5,12 +5,14 @@ namespace AdMaiora.AppKit.UI
     using Android.Content;
     using Android.Util;
     using Android.Widget;
+    using Android.Views;
 
     public class ItemGridView : GridView
     {
         #region Events
 
-        public event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public new event EventHandler<ItemListSelectEventArgs> ItemSelected;
+        public event EventHandler<ItemListLongPressEventArgs> ItemLongPress;
         public event EventHandler<ItemListCommandEventArgs> ItemCommand;
 
         #endregion
@@ -46,12 +48,17 @@ namespace AdMaiora.AppKit.UI
                 adapter.NotifyDataSetChanged();
         }
 
-        public void SelectItem(int index, object item)
+        internal void SelectItem(int index, object item)
         {
             OnItemSelected(index, item);
         }
 
-        public void ExecuteCommand(string command, object userData)
+        internal void LongPressItem(int index, object item)
+        {
+            OnItemLongPress(index, item);
+        }
+
+        internal void ExecuteCommand(string command, object userData)
         {
             OnItemCommand(command, userData);
         }
@@ -66,6 +73,12 @@ namespace AdMaiora.AppKit.UI
                 ItemSelected(this, new ItemListSelectEventArgs(index, item));
         }
 
+        protected void OnItemLongPress(int index, object item)
+        {
+            if (ItemLongPress != null)
+                ItemLongPress(this, new ItemListLongPressEventArgs(index, item));
+        }
+
         protected void OnItemCommand(string command, object userData)
         {
             if (ItemCommand != null)
@@ -77,24 +90,12 @@ namespace AdMaiora.AppKit.UI
         #region Methods
 
         private void Initialize()
-        {
-            this.ItemClick += ItemListView_ItemClick;
+        {            
         }
 
         #endregion
 
         #region Event Handlers
-
-        private void ItemListView_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            var o = this.Adapter.GetItem(e.Position);
-            var h = o as JavaHolder;
-
-            var item = h.Instance;
-
-            SelectItem(e.Position, item);
-        }
-
         #endregion
     }
 }
