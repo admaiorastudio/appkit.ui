@@ -4,6 +4,8 @@
 
     using UIKit;
     using CoreGraphics;
+    using Foundation;
+    using CoreText;
 
     public static class UILabelExtension
     {
@@ -83,5 +85,22 @@
             }
         }
 
+        public static void SetTextUnderline(this UILabel label, bool underline)
+        {
+            string fontName = label.Font.Name;
+            string text = label.Text ?? String.Empty;
+
+            var astring = new NSMutableAttributedString(text ?? String.Empty,
+                new CoreText.CTStringAttributes()
+                {
+                    UnderlineStyle = CTUnderlineStyle.Single,
+                    Font = new CTFont(fontName, 13f)
+                });
+
+            astring.AddAttribute(UIStringAttributeKey.ForegroundColor,
+                label.TextColor, new NSRange(0, text.Length));
+
+            label.AttributedText = astring;
+        }
     }
 }

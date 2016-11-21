@@ -156,7 +156,16 @@ namespace AdMaiora.AppKit.UI.App
             switch(item.ItemId)
             {
                 case Android.Resource.Id.Home:
-                    this.Activity.OnBackPressed();
+
+                    // We "force" a keyb dismiss to avoid
+                    // it stays on top while navigating back
+                    DismissKeyboard();
+
+                    // We "delay" a bit the back pressed execution
+                    // to avoid graphical issues
+                    (new Handler()).PostDelayed(
+                        () => this.Activity.OnBackPressed(), 100);
+
                     return true;
 
                 default:
@@ -202,8 +211,21 @@ namespace AdMaiora.AppKit.UI.App
         {
             _preseveViewWhenInBackStack = true;
 
-            if(_view == null)
-                _view = inflater.InflateWithWidgets(layoutResID, this, container, false);
+            if (_view == null)
+            {
+                //_view = inflater.InflateWithWidgets(layoutResID, this, container, false);
+                _view = inflater.Inflate(layoutResID, container, false);
+                View[] subviews = ViewBuilder.GetWidgets(this, _view);
+
+                foreach(View v in subviews)
+                {
+                    if (v is Button)
+                        ((Button)v).SetAutomaticPressedState();
+
+                    if (v is ImageButton)
+                        ((ImageButton)v).SetAutomaticPressedState();                        
+                }
+            }
         }
 
         protected void StartNotifyKeyboardStatus()

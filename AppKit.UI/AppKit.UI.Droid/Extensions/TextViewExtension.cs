@@ -11,5 +11,13 @@ namespace AdMaiora.AppKit.UI
         {
             textView.SetTypeface(textView.Typeface, bold ? TypefaceStyle.Bold : TypefaceStyle.Normal);
         }
+
+        public static void SetTextUnderline(this TextView textView, bool underline)
+        {
+            if(underline)
+                textView.PaintFlags |= PaintFlags.UnderlineText;
+            else
+                textView.PaintFlags &= ~PaintFlags.UnderlineText;
+        }
     }
 }
