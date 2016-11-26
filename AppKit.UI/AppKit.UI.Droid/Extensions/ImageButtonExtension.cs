@@ -18,38 +18,45 @@ namespace AdMaiora.AppKit.UI
     {
         public static void SetAutomaticPressedState(this ImageButton button)
         {
-            Drawable normalDrawable = button.Background;
-            Drawable pressedDrawable = null;
-            Drawable disableDrawable = null;
-
-            if (normalDrawable is ColorDrawable)
+            if ((button.Background == null || button.Background.Current == null)
+                && button.Drawable != null)
             {
-                Color c = ((normalDrawable) as ColorDrawable).Color;
+                Drawable normalDrawable = button.Drawable;
+                Drawable pressedDrawable = null;
+                Drawable disableDrawable = null;
 
-                pressedDrawable = new ColorDrawable(c);
-                pressedDrawable.SetColorFilter(Color.White, PorterDuff.Mode.SrcAtop);
+                ColorMatrix matrix = new ColorMatrix();
+                matrix.SetSaturation(0);
+                ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
 
-                disableDrawable = new ColorDrawable(c);
-                disableDrawable.SetColorFilter(Color.Gray, PorterDuff.Mode.SrcAtop);
+                if (normalDrawable is ColorDrawable)
+                {
+                    Color c = ((normalDrawable) as ColorDrawable).Color;
+
+                    pressedDrawable = new ColorDrawable(c);
+                    pressedDrawable.SetColorFilter(new Color(0, 0, 0, 20), PorterDuff.Mode.SrcAtop);
+
+                    disableDrawable = new ColorDrawable(c);
+                    disableDrawable.SetColorFilter(filter);
+                }
+                else if (normalDrawable is BitmapDrawable)
+                {
+                    BitmapDrawable bd = normalDrawable as BitmapDrawable;
+
+                    pressedDrawable = new BitmapDrawable(bd.Bitmap);
+                    pressedDrawable.SetColorFilter(new Color(0, 0, 0, 20), PorterDuff.Mode.SrcAtop);
+
+                    disableDrawable = new BitmapDrawable(bd.Bitmap);
+                    disableDrawable.SetColorFilter(filter);
+                }
+
+                StateListDrawable sld = new StateListDrawable();
+                sld.AddState(new[] { Android.Resource.Attribute.StatePressed }, pressedDrawable);
+                sld.AddState(new[] { -Android.Resource.Attribute.StateEnabled }, disableDrawable);
+                sld.AddState(new[] { Android.Resource.Attribute.StateEnabled }, normalDrawable);
+
+                button.SetImageDrawable(sld);
             }
-            else if (normalDrawable is BitmapDrawable)
-            {
-                BitmapDrawable bd = normalDrawable as BitmapDrawable;
-
-                pressedDrawable = new BitmapDrawable(bd.Bitmap);
-                pressedDrawable.SetColorFilter(new Color(255, 255, 255, 70), PorterDuff.Mode.SrcAtop);
-
-                disableDrawable = new BitmapDrawable(bd.Bitmap);
-                disableDrawable.SetColorFilter(Color.Gray, PorterDuff.Mode.SrcAtop);
-            }
-
-            StateListDrawable sld = new StateListDrawable();
-            sld.AddState(new[] { Android.Resource.Attribute.StatePressed }, pressedDrawable);
-            sld.AddState(new[] { -Android.Resource.Attribute.StateEnabled }, disableDrawable);
-            sld.AddState(new[] { Android.Resource.Attribute.StateEnabled }, normalDrawable);
-
-            button.Background = sld;
-
         }
     }
 }
