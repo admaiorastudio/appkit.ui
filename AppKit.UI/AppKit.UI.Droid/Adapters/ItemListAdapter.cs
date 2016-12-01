@@ -11,7 +11,7 @@ namespace AdMaiora.AppKit.UI
     {
         #region Constants and Fields
 
-        private Android.Support.V4.App.Fragment _context;
+        private Activity _context;
 
         private int _cellLayoutID;
 
@@ -26,7 +26,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Constructor and Destructor
 
-        public ItemListAdapter(Android.Support.V4.App.Fragment context, int cellLayoutID, IEnumerable<T> source)
+        public ItemListAdapter(Activity context, int cellLayoutID, IEnumerable<T> source)
         {
             _context = context;
 
@@ -36,6 +36,11 @@ namespace AdMaiora.AppKit.UI
 
             _associationIndex = 0;
             _associatedItems = new Dictionary<int, T>();
+        }
+
+        public ItemListAdapter(Android.Support.V4.App.Fragment context, int cellLayoutID, IEnumerable<T> source)
+            : this(context.Activity, cellLayoutID, source)
+        {
         }
 
         #endregion
@@ -106,7 +111,7 @@ namespace AdMaiora.AppKit.UI
             View view = convertView;
             if (view == null && _cellLayoutID != -1)
             {
-                LayoutInflater inflater = LayoutInflater.From(_context.Context);
+                LayoutInflater inflater = LayoutInflater.From(_context);
                 view = inflater.Inflate(_cellLayoutID, parent, false);
                 view.Tag = ++_associationIndex;
                 view.Clickable = true;

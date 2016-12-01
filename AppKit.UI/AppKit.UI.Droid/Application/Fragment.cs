@@ -61,7 +61,7 @@ namespace AdMaiora.AppKit.UI.App
         {
             get
             {
-                if (base.Arguments == null)
+                if (base.Arguments == null && this.Activity == null)
                     base.Arguments = new Bundle();
 
                 return base.Arguments;
@@ -215,15 +215,18 @@ namespace AdMaiora.AppKit.UI.App
             {
                 //_view = inflater.InflateWithWidgets(layoutResID, this, container, false);
                 _view = inflater.Inflate(layoutResID, container, false);
+
                 View[] subviews = ViewBuilder.GetWidgets(this, _view);
-
-                foreach(View v in subviews)
+                if (subviews != null)
                 {
-                    if (v is Button)
-                        ((Button)v).SetAutomaticPressedState();
+                    foreach (View v in subviews)
+                    {
+                        if (v is Button)
+                            ((Button)v).SetAutomaticPressedState();
 
-                    if (v is ImageButton)
-                        ((ImageButton)v).SetAutomaticPressedState();                        
+                        if (v is ImageButton)
+                            ((ImageButton)v).SetAutomaticPressedState();
+                    }
                 }
             }
         }

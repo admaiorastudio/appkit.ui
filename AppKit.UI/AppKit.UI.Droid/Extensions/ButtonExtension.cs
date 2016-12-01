@@ -73,7 +73,7 @@ namespace AdMaiora.AppKit.UI
                     Color c = ((normalDrawable) as ColorDrawable).Color;
 
                     pressedDrawable = new ColorDrawable(c);
-                    pressedDrawable.SetColorFilter(new Color(0, 0, 0, 20), PorterDuff.Mode.SrcAtop);
+                    pressedDrawable.SetColorFilter(new Color(0, 0, 0, 30), PorterDuff.Mode.SrcAtop);
 
                     disableDrawable = new ColorDrawable(c);
                     disableDrawable.SetColorFilter(filter);
@@ -83,7 +83,7 @@ namespace AdMaiora.AppKit.UI
                     BitmapDrawable bd = normalDrawable as BitmapDrawable;
 
                     pressedDrawable = new BitmapDrawable(bd.Bitmap);
-                    pressedDrawable.SetColorFilter(new Color(0, 0, 0, 20), PorterDuff.Mode.SrcAtop);
+                    pressedDrawable.SetColorFilter(new Color(0, 0, 0, 30), PorterDuff.Mode.SrcAtop);
 
                     disableDrawable = new BitmapDrawable(bd.Bitmap);
                     disableDrawable.SetColorFilter(filter);

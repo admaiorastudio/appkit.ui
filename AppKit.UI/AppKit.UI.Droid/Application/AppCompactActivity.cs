@@ -95,15 +95,18 @@ namespace AdMaiora.AppKit.UI.App
         protected void SetContentView(int layoutResID, int contentLayoutResID = 0, int toolBarResId = 0)
         {
             base.SetContentView(layoutResID);
+
             View[] subviews = ViewBuilder.GetWidgets(this);
-
-            foreach (View v in subviews)
+            if (subviews != null)
             {
-                if (v is Button)
-                    ((Button)v).SetAutomaticPressedState();
+                foreach (View v in subviews)
+                {
+                    if (v is Button)
+                        ((Button)v).SetAutomaticPressedState();
 
-                if (v is ImageButton)
-                    ((ImageButton)v).SetAutomaticPressedState();
+                    if (v is ImageButton)
+                        ((ImageButton)v).SetAutomaticPressedState();
+                }
             }
 
             if (contentLayoutResID != 0)

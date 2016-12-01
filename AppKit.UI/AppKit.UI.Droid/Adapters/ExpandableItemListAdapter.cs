@@ -12,7 +12,7 @@ namespace AdMaiora.AppKit.UI
     {
         #region Constants and Fields
 
-        private Android.Support.V4.App.Fragment _context;
+        private Activity _context;
 
         private int _parentLayoutID;
         private int _childLayoutID;
@@ -28,7 +28,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Constructor and Destructor
 
-        public ExpandableItemListAdapter(Android.Support.V4.App.Fragment context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TChild>> groups)
+        public ExpandableItemListAdapter(Activity context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TChild>> groups)
         {
             _context = context;
 
@@ -45,9 +45,14 @@ namespace AdMaiora.AppKit.UI
             _associatedItems = new Dictionary<int, TChild>();
         }
 
+        public ExpandableItemListAdapter(Android.Support.V4.App.Fragment context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TChild>> groups)
+            : this(context.Activity, parentLayoutID, childLayoutID, groups)
+        {
+        }
+
         #endregion
 
-        #region Indexers
+            #region Indexers
 
         public KeyValuePair<TGroup, IList<TChild>> this[int position]
         {
@@ -132,7 +137,7 @@ namespace AdMaiora.AppKit.UI
 
             if (view == null && _parentLayoutID != -1)
             {
-                LayoutInflater inflater = LayoutInflater.From(_context.Context);
+                LayoutInflater inflater = LayoutInflater.From(_context);
                 view = inflater.Inflate(_parentLayoutID, parent, false);
 
                 GetGroupViewCreated(view, parent);
@@ -149,7 +154,7 @@ namespace AdMaiora.AppKit.UI
 
             if (view == null && _childLayoutID != -1)
             {
-                LayoutInflater inflater = LayoutInflater.From(_context.Context);
+                LayoutInflater inflater = LayoutInflater.From(_context);
                 view = inflater.Inflate(_childLayoutID, null);
                 view.Tag = ++_associationIndex;
                 view.Clickable = true;

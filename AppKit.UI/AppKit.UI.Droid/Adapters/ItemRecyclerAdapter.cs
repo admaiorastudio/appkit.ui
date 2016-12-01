@@ -23,7 +23,7 @@ namespace AdMaiora.AppKit.UI
     {
         #region Constants and Fields
 
-        private Android.Support.V4.App.Fragment _context;
+        private Activity _context;
 
         private int _viewLayoutID;
 
@@ -38,7 +38,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Constructors
 
-        public ItemRecyclerAdapter(Android.Support.V4.App.Fragment context, int viewLayoutID, IEnumerable<TItem> source)
+        public ItemRecyclerAdapter(Activity context, int viewLayoutID, IEnumerable<TItem> source)
         {
             _context = context;
 
@@ -49,6 +49,12 @@ namespace AdMaiora.AppKit.UI
             _associationIndex = 0;
             _associatedItems = new Dictionary<int, TItem>();
         }
+
+        public ItemRecyclerAdapter(Android.Support.V4.App.Fragment context, int viewLayoutID, IEnumerable<TItem> source)
+            : this(context.Activity, viewLayoutID, source)
+        {
+        }
+
 
         #endregion
 
@@ -103,7 +109,7 @@ namespace AdMaiora.AppKit.UI
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) 
         {
-            LayoutInflater inflater = LayoutInflater.From(_context.Context);
+            LayoutInflater inflater = LayoutInflater.From(_context);
             Android.Views.View view = inflater.Inflate(_viewLayoutID, parent, false);
             view.Tag = ++_associationIndex;
             view.Clickable = true;            
