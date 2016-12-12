@@ -106,6 +106,9 @@ namespace AdMaiora.AppKit.UI.App
 
                     if (v is ImageButton)
                         ((ImageButton)v).SetAutomaticPressedState();
+
+                    if (v is EditText)
+                        ((EditText)v).SaveEnabled = false;
                 }
             }
 
