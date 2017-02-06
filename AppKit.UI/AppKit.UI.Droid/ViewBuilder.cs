@@ -159,8 +159,6 @@ namespace AdMaiora.AppKit.UI
                 | System.Reflection.BindingFlags.Public
                 | System.Reflection.BindingFlags.DeclaredOnly);
 
-
-
             if (fields == null || fields.Length == 0)
                 return null;
                       
@@ -178,8 +176,7 @@ namespace AdMaiora.AppKit.UI
                     continue;
 
                 //isWidgetAttributeUsed = true;
-
-                Type fieldType = field.FieldType;
+                
                 int id = Android.App.Application.Context.Resources.GetIdentifier(field.Name, "id", Android.App.Application.Context.PackageName);
                 View view = container != null ? container.FindViewById(id) : (View)getter.Invoke(context, new object[] { id });
                 field.SetValue(context, view);

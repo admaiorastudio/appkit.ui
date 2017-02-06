@@ -9,7 +9,7 @@ namespace AdMaiora.AppKit.UI
     using Android.Widget;
     using Android.Support.V7.Widget;
 
-    public class ItemViewHolder : RecyclerView.ViewHolder
+    public abstract class ItemViewHolder : RecyclerView.ViewHolder
     {
         public ItemViewHolder(View itemView)
             : base(itemView)
@@ -18,7 +18,7 @@ namespace AdMaiora.AppKit.UI
         }
     }
 
-    public class ItemRecyclerAdapter<THolder, TItem> : RecyclerView.Adapter, View.IOnClickListener, View.IOnLongClickListener
+    public abstract class ItemRecyclerAdapter<THolder, TItem> : RecyclerView.Adapter, View.IOnClickListener, View.IOnLongClickListener
         where THolder : ItemViewHolder
     {
         #region Constants and Fields
@@ -55,7 +55,6 @@ namespace AdMaiora.AppKit.UI
         {
         }
 
-
         #endregion
 
         #region Indexers
@@ -89,6 +88,14 @@ namespace AdMaiora.AppKit.UI
             set
             {
                 _sourceItems = value;
+            }
+        }
+
+        protected Activity Context
+        {
+            get
+            {
+                return _context;
             }
         }
 

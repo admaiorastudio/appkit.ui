@@ -15,12 +15,14 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Constants and Fields
 
+        private string _contentLayoutId;
+
         private UIBundle _bundle;
 
         #endregion
 
         #region Widgets
-
+        
         private UIView ContentLayout;       
         
         #endregion
@@ -35,6 +37,14 @@ namespace AdMaiora.AppKit.UI.App
         #endregion
 
         #region Properties
+
+        public string ContentLayouId
+        {
+            get
+            {
+                return _contentLayoutId;
+            }
+        }
 
         public UINavigationController ContentController
         {
@@ -111,15 +121,26 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Methods
 
-        protected void SetContentView(UIView contentLayout)
+        protected void SetContentView(UIView view, string contentLayoutId = null)
         {
-            this.ContentLayout = contentLayout;
+            _contentLayoutId = contentLayoutId;
 
-            this.ContentController = new UIControlledNavigationController();
-            this.ContentController.NavigationBar.Translucent = false;
-            AddChildViewController(this.ContentController);
-            this.ContentLayout.AddSubview(this.ContentController.View);
-            this.ContentController.View.Frame = this.ContentLayout.Bounds;
+            UIView[] subviews = ViewBuilder.GetWidgets(this);
+            if (subviews != null)
+            {                
+                if (!String.IsNullOrWhiteSpace(contentLayoutId))
+                {
+                    this.ContentLayout = view.FindViewById<UIView>("ContentLayout");  
+                    if (this.ContentLayout != null)
+                    {
+                        this.ContentController = new UIControlledNavigationController();
+                        this.ContentController.NavigationBar.Translucent = false;
+                        AddChildViewController(this.ContentController);
+                        this.ContentLayout.AddSubview(this.ContentController.View);
+                        this.ContentController.View.Frame = this.ContentLayout.Bounds;
+                    }
+                }
+            }
         }
 
         protected void MakeRoot(Type viewController, UIBundle bundle = null)
@@ -134,6 +155,14 @@ namespace AdMaiora.AppKit.UI.App
 
             UIApplication.SharedApplication.Windows[0].RootViewController = c;
             UIApplication.SharedApplication.Windows[0].MakeKeyAndVisible();
+        }
+
+        public T FindViewById<T>(string id) where T : UIView
+        {
+            if (this.View == null)
+                return null;
+
+            return this.View.FindViewById<T>(id);
         }
 
         public void DismissKeyboard()

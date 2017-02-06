@@ -1,13 +1,16 @@
 namespace AdMaiora.AppKit.UI
 {
+    using System;
     using System.Collections.Generic;
+    using System.Reflection;
 
     using Android.App;
     using Android.Content;
     using Android.Views;
     using Android.Widget;
 
-    public abstract class ItemListAdapter<T> : BaseAdapter<T>, View.IOnClickListener, View.IOnLongClickListener
+    public abstract class ItemListAdapter<THolder, TItem> : BaseAdapter<TItem>, View.IOnClickListener, View.IOnLongClickListener
+        where THolder : ItemViewHolder
     {
         #region Constants and Fields
 
@@ -15,30 +18,37 @@ namespace AdMaiora.AppKit.UI
 
         private int _cellLayoutID;
 
-        private List<T> _sourceItems;
+        private List<TItem> _sourceItems;
 
-        // This dictionary preserve a map to View hash code and 
-        // an associate item, to be used later when the method GetItemForView needs it
         private int _associationIndex;
-        private Dictionary<int, T> _associatedItems;
 
+        // This dictionary maps each View created to it's related TItem
+        // Will be used as hash table for the GetItemFromView() method             
+        private Dictionary<int, TItem> _associatedItems;
+
+        // This dictionary maps each UITableViewCell created to it's related TOutlets
+        // Will be used as hash table for the GetView() method         
+        private Dictionary<int, ItemViewHolder> _associatedHolders;
+    
         #endregion
 
         #region Constructor and Destructor
 
-        public ItemListAdapter(Activity context, int cellLayoutID, IEnumerable<T> source)
+        public ItemListAdapter(Activity context, int cellLayoutID, IEnumerable<TItem> source)
         {
             _context = context;
 
             _cellLayoutID = cellLayoutID;
 
-            _sourceItems = new List<T>(source);
+            _sourceItems = new List<TItem>(source);
 
             _associationIndex = 0;
-            _associatedItems = new Dictionary<int, T>();
+
+            _associatedItems = new Dictionary<int, TItem>();
+            _associatedHolders = new Dictionary<int, ItemViewHolder>();
         }
 
-        public ItemListAdapter(Android.Support.V4.App.Fragment context, int cellLayoutID, IEnumerable<T> source)
+        public ItemListAdapter(Android.Support.V4.App.Fragment context, int cellLayoutID, IEnumerable<TItem> source)
             : this(context.Activity, cellLayoutID, source)
         {
         }
@@ -47,7 +57,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Indexers
 
-        public override T this[int position]
+        public override TItem this[int position]
         {
             get
             {
@@ -67,7 +77,7 @@ namespace AdMaiora.AppKit.UI
             }
         }
 
-        protected List<T> SourceItems
+        protected List<TItem> SourceItems
         {
             get
             {
@@ -76,6 +86,14 @@ namespace AdMaiora.AppKit.UI
             set
             {
                 _sourceItems = value;
+            }
+        }
+
+        protected Activity Context
+        {
+            get
+            {
+                return _context;
             }
         }
 
@@ -93,7 +111,7 @@ namespace AdMaiora.AppKit.UI
             return position;
         }
 
-        public int GetItemIndex(T item)
+        public int GetItemIndex(TItem item)
         {
             if (_sourceItems == null
                 || _sourceItems.Count == 0)
@@ -106,7 +124,7 @@ namespace AdMaiora.AppKit.UI
 
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
-            T item = _sourceItems[position];
+            TItem item = _sourceItems[position];
 
             View view = convertView;
             if (view == null && _cellLayoutID != -1)
@@ -118,34 +136,42 @@ namespace AdMaiora.AppKit.UI
                 view.SetOnClickListener(this);
                 view.SetOnLongClickListener(this);
 
-                _associatedItems[(int)view.Tag] = item;
+                var vh = Activator.CreateInstance(typeof(THolder), view) as ItemViewHolder;
+                _associatedHolders.Add((int)view.Tag, vh);
 
-                GetViewCreated(view, parent);
+                _associatedItems[(int)view.Tag] = item;
+                GetViewCreated((THolder)vh, view, parent);
             }
             else
             {
                 _associatedItems[(int)view.Tag] = item;
             }
 
-            return GetView(position, item, view, parent);
+            return GetView(parent, position, (THolder)_associatedHolders[(int)view.Tag], view, item);
         }
 
-        public virtual View GetView(int position, T item, View view, ViewGroup parent)
+        public virtual View GetView(ViewGroup parent, int position, THolder holder, View view, TItem item)
         {
+            GetView(position, holder, view, item);
             return view;
         }
 
-        public virtual void AddItem(T item)
+        public virtual void GetView(int position, THolder holder, View view, TItem item)
+        {
+            /* Do Nothing */
+        }
+
+        public virtual void AddItem(TItem item)
         {
             _sourceItems.Add(item);
         }
 
-        public virtual void InsertItem(int position, T item)
+        public virtual void InsertItem(int position, TItem item)
         {
             _sourceItems.Insert(position, item);
         }
 
-        public virtual void RemoveItem(T item)
+        public virtual void RemoveItem(TItem item)
         {
             _sourceItems.Remove(item);
         }
@@ -186,7 +212,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Methods
 
-        protected T GetItemFromView(View view)
+        protected TItem GetItemFromView(View view)
         {
             while (view != null)
             {
@@ -195,14 +221,14 @@ namespace AdMaiora.AppKit.UI
                 {
                     object instance = _associatedItems[associatedIndex];
 
-                    if (instance is T)
-                        return (T)instance;
+                    if (instance is TItem)
+                        return (TItem)instance;
                 }
 
                 view = view.Parent as View;
             }
 
-            return default(T);
+            return default(TItem);
         }
 
         protected void ExecuteCommand(View sender, string command, object userData)
@@ -212,7 +238,7 @@ namespace AdMaiora.AppKit.UI
                 listView.ExecuteCommand(command, userData);
         }
 
-        protected virtual void GetViewCreated(View view, ViewGroup parent)
+        protected virtual void GetViewCreated(THolder holder, View view, ViewGroup parent)
         {
             /* Do Nothing */
         }

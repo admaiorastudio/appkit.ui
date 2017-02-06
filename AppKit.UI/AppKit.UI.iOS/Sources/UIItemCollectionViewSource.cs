@@ -6,7 +6,8 @@
     using Foundation;
     using UIKit;
 
-    public abstract class UIItemCollectionViewSource<T> : UICollectionViewSource
+    public abstract class UIItemCollectionViewSource<THolder, TItem> : UICollectionViewSource
+        where THolder : ItemViewHolder
     {
         #region Constants and Fields
 
@@ -14,34 +15,41 @@
        
         private string _cellLayout;
 
-        private List<T> _sourceItems;
+        private List<TItem> _sourceItems;
 
-        // This dictionary preserve a map to UITableViewCell hash code and 
-        // an associate item, to be used later when the method GetItemForView needs it
         private nint _associatedIndex;
-        private Dictionary<nint, T> _associatedItems;
+
+        // This dictionary maps each UITableViewCell created to it's related TItem
+        // Will be used as hash table for the GetItemFromView() method           
+        private Dictionary<nint, TItem> _associatedItems;
+
+        // This dictionary maps each UITableViewCell created to it's related TOutlets
+        // Will be used as hash table for the GetView() method         
+        private Dictionary<nint, ItemViewHolder> _associatedHolders;
 
         #endregion
 
         #region Constructors and Destructors
 
-        public UIItemCollectionViewSource(UIViewController viewController, string cellLayout, IEnumerable<T> source)
+        public UIItemCollectionViewSource(UIViewController viewController, string cellLayout, IEnumerable<TItem> source)
         {
             _viewController = viewController;
 
             _cellLayout = cellLayout;
 
-            _sourceItems = new List<T>(source);
+            _sourceItems = new List<TItem>(source);
 
             _associatedIndex = 0;
-            _associatedItems = new Dictionary<nint, T>();
+
+            _associatedItems = new Dictionary<nint, TItem>();
+            _associatedHolders = new Dictionary<nint, ItemViewHolder>();
         }
 
         #endregion
 
         #region Indexers
 
-        public T this[int position]
+        public TItem this[int position]
         {
             get 
             { 
@@ -53,23 +61,15 @@
 
         #region Properties
 
-        public int Count
+        public int ItemCount
         {
             get 
             { 
                 return _sourceItems.Count; 
             }
         }
-            
-        protected UIViewController ViewController
-        {
-            get
-            {
-                return _viewController;
-            }
-        }
-            
-        protected List<T> SourceItems
+                        
+        protected List<TItem> SourceItems
         {
             get
             {
@@ -81,11 +81,19 @@
 			}
         }
 
+        protected UIViewController ViewController
+        {
+            get
+            {
+                return _viewController;
+            }
+        }
+
         #endregion
 
         #region Public Methods
 
-        public int GetItemIndex(T item)
+        public int GetItemIndex(TItem item)
         {
             if(_sourceItems == null
                 || _sourceItems.Count == 0)
@@ -103,7 +111,7 @@
                     
         public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
-            T item = _sourceItems[indexPath.Row];
+            TItem item = _sourceItems[indexPath.Row];
 
             UICollectionViewCell view = (UICollectionViewCell)collectionView.DequeueReusableCell(_cellLayout, indexPath);
             if (view == null)
@@ -129,22 +137,31 @@
                 lpgr.MinimumPressDuration = 1.0;
                 view.AddGestureRecognizer(lpgr);
 
+                var vh = Activator.CreateInstance(typeof(THolder), view) as ItemViewHolder;
+                _associatedHolders.Add(view.Tag, vh);
+
                 _associatedItems.Add(view.Tag, item);
-                GetViewCreated(collectionView, view);
+                GetViewCreated((THolder)vh, view, collectionView);
             }
             else
             {
 				_associatedItems[view.Tag] = item;
             }
 
-            return GetCell(collectionView, indexPath, view, item);
+            return GetCell(collectionView, indexPath, (THolder)_associatedHolders[view.Tag], view, item);
         }
                                
-        public virtual UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath, UICollectionViewCell cellView, T item)
+        public virtual UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath, THolder holder, UICollectionViewCell cellView, TItem item)
         {
+            GetCell(indexPath, holder, cellView, item);
             return cellView;
         }
-            
+
+        public virtual void GetCell(NSIndexPath indexPath, THolder holder, UICollectionViewCell view, TItem item)
+        {
+            /* Do Nothing */
+        }
+
         public override bool ShouldSelectItem(UICollectionView collectionView, NSIndexPath indexPath)
         {
             UIItemCollectionView listView = collectionView as UIItemCollectionView;
@@ -182,12 +199,12 @@
                 collectionView.WhenScrolledToTop();
         }
                                                 
-        public virtual void AddItem(T item)
+        public virtual void AddItem(TItem item)
         {
             _sourceItems.Add(item);
         }
 
-        public virtual void RemoveItem(T item)
+        public virtual void RemoveItem(TItem item)
         {
             _sourceItems.Remove(item);
         }
@@ -208,7 +225,7 @@
                 listView.ExecuteCommand(command, userData);
         }
             
-        protected T GetItemFromView(UIView view)
+        protected TItem GetItemFromView(UIView view)
         {
             while (view != null)
             {
@@ -217,17 +234,17 @@
                 {
                     object instance = _associatedItems[associatedIndex];
 
-                    if (instance is T)
-                        return (T)instance;
+                    if (instance is TItem)
+                        return (TItem)instance;
                 }
 
                 view = view.Superview as UIView;
             }
 
-            return default(T);
+            return default(TItem);
         }
 
-        protected virtual void GetViewCreated(UICollectionView collectionView, UICollectionViewCell cellView)
+        protected virtual void GetViewCreated(THolder holder, UICollectionViewCell view, UICollectionView parent)
         {
             /* Do Nothing */
         }  

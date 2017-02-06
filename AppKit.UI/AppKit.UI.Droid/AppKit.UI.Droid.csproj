@@ -15,7 +15,7 @@
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v7.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v7.1</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -75,6 +75,7 @@
     <Compile Include="Application\AppCompactActivity.cs" />
     <Compile Include="Application\Fragment.cs" />
     <Compile Include="Extensions\BundleExtension.cs" />
+    <Compile Include="Extensions\Cross\ButtonExtension.cs" />
     <Compile Include="Extensions\ImageButtonExtension.cs" />
     <Compile Include="Extensions\ButtonExtension.cs" />
     <Compile Include="Extensions\LayoutInflaterExtension.cs" />
@@ -110,6 +111,7 @@
       <Name>AppKit.UI</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\..\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\..\packages\Xamarin.Android.Support.Vector.Drawable.23.4.0.1\build\Xamarin.Android.Support.Vector.Drawable.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

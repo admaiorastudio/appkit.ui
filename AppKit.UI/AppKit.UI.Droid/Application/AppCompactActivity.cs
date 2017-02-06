@@ -20,7 +20,7 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Constants and Fields
 
-        private int _contentLayoutResID;
+        private int _contentLayoutResId;
 
         private Bundle _extras;
 
@@ -36,12 +36,20 @@ namespace AdMaiora.AppKit.UI.App
 
         public AppCompactActivity()
         {
-            _contentLayoutResID = -1;
+            _contentLayoutResId = -1;
         }
 
         #endregion
 
         #region Properties
+
+        public int ContentLayouId
+        {
+            get
+            {
+                return _contentLayoutResId;
+            }
+        }
 
         public Bundle Arguments
         {
@@ -72,9 +80,9 @@ namespace AdMaiora.AppKit.UI.App
 
         public override void OnBackPressed()
         {
-            if (_contentLayoutResID != -1)
+            if (_contentLayoutResId != -1)
             {
-                var f = this.SupportFragmentManager.FindFragmentById(_contentLayoutResID);
+                var f = this.SupportFragmentManager.FindFragmentById(_contentLayoutResId);
                 if (f is AdMaiora.AppKit.UI.App.Fragment)
                 {
                     if (((AdMaiora.AppKit.UI.App.Fragment)f).OnBackButton())
@@ -92,7 +100,7 @@ namespace AdMaiora.AppKit.UI.App
 
         #region Methods
 
-        protected void SetContentView(int layoutResID, int contentLayoutResID = 0, int toolBarResId = 0)
+        protected void SetContentView(int layoutResID, int contentLayoutResId = 0, int toolBarResId = 0)
         {
             base.SetContentView(layoutResID);
 
@@ -112,8 +120,8 @@ namespace AdMaiora.AppKit.UI.App
                 }
             }
 
-            if (contentLayoutResID != 0)
-                _contentLayoutResID = contentLayoutResID;
+            if (contentLayoutResId != 0)
+                _contentLayoutResId = contentLayoutResId;
 
             if (toolBarResId != 0)
             {

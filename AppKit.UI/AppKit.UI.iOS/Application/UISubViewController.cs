@@ -334,6 +334,18 @@
 
         #region Methods
 
+        protected void SetContentView(UIView view)
+        {
+            UIView[] subviews = ViewBuilder.GetWidgets(this);
+            if (subviews != null)
+            {
+                // Nothing to do for now
+                //foreach (UIView v in subviews)
+                //{
+                //}
+            }
+        }
+
         public void StartNotifyKeyboardStatus()
         {
             _isNotifyngKeyboardStatus = true;

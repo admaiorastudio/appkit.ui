@@ -1,14 +1,17 @@
 namespace AdMaiora.AppKit.UI
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     using Android.App;
     using Android.Content;
     using Android.Views;
     using Android.Widget;
 
-    public abstract class ExpandableItemListAdapter<TGroup, TChild> : BaseExpandableListAdapter, View.IOnClickListener, View.IOnLongClickListener
+    public abstract class ExpandableItemListAdapter<THolder, TGroup, TItem> : BaseExpandableListAdapter, View.IOnClickListener, View.IOnLongClickListener
+        where THolder : ItemViewHolder
     {
         #region Constants and Fields
 
@@ -17,44 +20,51 @@ namespace AdMaiora.AppKit.UI
         private int _parentLayoutID;
         private int _childLayoutID;
 
-        private List<KeyValuePair<TGroup, IList<TChild>>> _sourceItems;
+        private List<KeyValuePair<TGroup, IList<TItem>>> _sourceItems;
 
-        // This dictionary preserve a map to View hash code and 
-        // an associate item, to be used later when the method GetItemForView needs it
         private int _associationIndex;
-        private Dictionary<int, TChild> _associatedItems;
 
+        // This dictionary maps each UITableViewCell created to it's related TItem
+        // Will be used as hash table for the GetItemFromView() method           
+        private Dictionary<int, TItem> _associatedItems;
+
+        // This dictionary maps each UITableViewCell created to it's related TOutlets
+        // Will be used as hash table for the GetView() method         
+        private Dictionary<int, ItemViewHolder> _associatedHolders;
+        
         #endregion
 
         #region Constructor and Destructor
 
-        public ExpandableItemListAdapter(Activity context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TChild>> groups)
+        public ExpandableItemListAdapter(Activity context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TItem>> groups)
         {
             _context = context;
 
             _parentLayoutID = parentLayoutID;
             _childLayoutID = childLayoutID;
 
-            _sourceItems = new List<KeyValuePair<TGroup, IList<TChild>>>();
-            foreach (IGrouping<TGroup, TChild> grouping in groups)
+            _sourceItems = new List<KeyValuePair<TGroup, IList<TItem>>>();
+            foreach (IGrouping<TGroup, TItem> grouping in groups)
             {
-                _sourceItems.Add(new KeyValuePair<TGroup, IList<TChild>>(grouping.Key, new List<TChild>(grouping)));
+                _sourceItems.Add(new KeyValuePair<TGroup, IList<TItem>>(grouping.Key, new List<TItem>(grouping)));
             }
 
             _associationIndex = 0;
-            _associatedItems = new Dictionary<int, TChild>();
+
+            _associatedItems = new Dictionary<int, TItem>();
+            _associatedHolders = new Dictionary<int, ItemViewHolder>();
         }
 
-        public ExpandableItemListAdapter(Android.Support.V4.App.Fragment context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TChild>> groups)
+        public ExpandableItemListAdapter(Android.Support.V4.App.Fragment context, int parentLayoutID, int childLayoutID, IEnumerable<IGrouping<TGroup, TItem>> groups)
             : this(context.Activity, parentLayoutID, childLayoutID, groups)
         {
         }
 
         #endregion
 
-            #region Indexers
+        #region Indexers
 
-        public KeyValuePair<TGroup, IList<TChild>> this[int position]
+        public KeyValuePair<TGroup, IList<TItem>> this[int position]
         {
             get
             {
@@ -82,11 +92,19 @@ namespace AdMaiora.AppKit.UI
             }
         }
 
-        protected List<KeyValuePair<TGroup, IList<TChild>>> Groups
+        protected List<KeyValuePair<TGroup, IList<TItem>>> Groups
         {
             get
             {
                 return _sourceItems;
+            }
+        }        
+
+        protected Activity Context
+        {
+            get
+            {
+                return _context;
             }
         }
 
@@ -148,9 +166,14 @@ namespace AdMaiora.AppKit.UI
             return GetGroupView(groupPosition, isExpanded, item, view, parent);
         }
 
+        public virtual View GetGroupView(int position, bool isExpanded, TGroup item, View view, ViewGroup parent)
+        {
+            return view;
+        }
+
         public override View GetChildView(int groupPosition, int childPosition, bool isLastChild, View view, ViewGroup parent)
         {
-            TChild item = _sourceItems[groupPosition].Value[childPosition];
+            TItem item = _sourceItems[groupPosition].Value[childPosition];
 
             if (view == null && _childLayoutID != -1)
             {
@@ -161,39 +184,42 @@ namespace AdMaiora.AppKit.UI
                 view.SetOnClickListener(this);
                 view.SetOnLongClickListener(this);
 
-                _associatedItems[(int)view.Tag] = item;
+                var vh = Activator.CreateInstance(typeof(THolder), view) as ItemViewHolder;
+                _associatedHolders.Add((int)view.Tag, vh);
 
-                GetChildViewCreated(view, parent);
+                _associatedItems[(int)view.Tag] = item;
+                GetChildViewCreated((THolder)vh, view, parent);
             }
             else
             {
                 _associatedItems[(int)view.Tag] = item;
             }
 
-            return GetChildView(groupPosition, childPosition, isLastChild, item, view, parent);
+            return GetChildView(parent, groupPosition, childPosition, isLastChild, (THolder)_associatedHolders[(int)view.Tag], view, item);
         }
 
-        public virtual View GetGroupView(int position, bool isExpanded, TGroup item, View view, ViewGroup parent)
+        public virtual View GetChildView(ViewGroup parent, int groupPosition, int childPosition, bool isLastChild, THolder holder, View view, TItem item)
         {
+            GetChildView(groupPosition, childPosition, holder, view, item);
             return view;
         }
 
-        public virtual View GetChildView(int groupPosition, int childPosition, bool isLastChild, TChild item, View view, ViewGroup parent)
+        public virtual void GetChildView(int groupPosition, int childPosition, THolder holder, View view, TItem item)
         {
-            return view;
+            /* Do Nothing */
         }
 
-        public virtual void AddItem(int groupPosition, TChild item)
+        public virtual void AddItem(int groupPosition, TItem item)
         {
             _sourceItems[groupPosition].Value.Add(item);
         }
 
-        public virtual void InsertItem(int groupPosition, int position, TChild item)
+        public virtual void InsertItem(int groupPosition, int position, TItem item)
         {
             _sourceItems[groupPosition].Value.Insert(position, item);
         }
 
-        public virtual void RemoveItem(int groupPosition, int position, TChild item)
+        public virtual void RemoveItem(int groupPosition, int position, TItem item)
         {
             _sourceItems[groupPosition].Value.Remove(item);
         }
@@ -233,7 +259,7 @@ namespace AdMaiora.AppKit.UI
 
         #region Methods
 
-        protected TChild GetItemFromView(View view)
+        protected TItem GetItemFromView(View view)
         {
             while (view != null)
             {
@@ -242,14 +268,14 @@ namespace AdMaiora.AppKit.UI
                 {
                     object instance = _associatedItems[associatedIndex];
 
-                    if (instance is TChild)
-                        return (TChild)instance;
+                    if (instance is TItem)
+                        return (TItem)instance;
                 }
 
                 view = view.Parent as View;
             }
 
-            return default(TChild);
+            return default(TItem);
         }
 
         protected void ExecuteCommand(View sender, string command, object userData)
@@ -259,17 +285,17 @@ namespace AdMaiora.AppKit.UI
                 listView.ExecuteCommand(command, userData);
         }
 
-        protected virtual void GetGroupViewCreated(View convertView, ViewGroup parent)
+        protected virtual void GetGroupViewCreated(View view, ViewGroup parent)
         {
             /* Do Nothing */
         }
 
-        protected virtual void GetChildViewCreated(View convertView, ViewGroup parent)
+        protected virtual void GetChildViewCreated(THolder holder, View view, ViewGroup parent)
         {
             /* Do Nothing */
         }
 
-        private int GetItemIndex(TChild item)
+        private int GetItemIndex(TItem item)
         {
             int index = -1;
             foreach(var kvp in _sourceItems)

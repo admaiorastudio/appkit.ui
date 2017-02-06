@@ -7,7 +7,38 @@
     using CoreGraphics;
 
     public static class UIViewExtension   
-    {               
+    {
+        public static T FindViewById<T>(this UIView view, string id) where T : UIView
+        {
+            if (view == null)
+                throw new NullReferenceException();
+
+            return (T)FindView(view, id);
+        }
+
+        private static UIView FindView(UIView container, string id)
+        {
+            if (container.Subviews.Length == 0)
+                return null;
+
+            UIView view = null;
+
+            foreach (var v in container.Subviews)
+            {
+                if (v.AccessibilityIdentifier == id)
+                {
+                    view = v;
+                    break;
+                }
+                else if (v.Subviews.Length != 0)
+                {
+                    view = FindView(v, id);
+                }
+            }
+
+            return view;
+        }
+
         public static UIView GetFirstResponder(this UIView view)
         {            
             UIView[] subviews = view.Subviews;

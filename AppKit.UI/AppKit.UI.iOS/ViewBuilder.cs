@@ -7,6 +7,14 @@ namespace AdMaiora.AppKit.UI
     using UIKit;
     using CoreGraphics;
 
+    public class WidgetAttribute : Attribute
+    {
+        public WidgetAttribute()
+        {
+
+        }
+    }
+
     public static class ViewBuilder
     {
         #region Constants and Fields
@@ -81,31 +89,34 @@ namespace AdMaiora.AppKit.UI
             }
         }
 
-        public static UIView[] GetWidgets(object context)
+        public static UIView[] GetWidgets(object context, UIView container = null)
         {
             Type type = context.GetType();
-            var properties = type.GetProperties(System.Reflection.BindingFlags.Instance
+            var fields = type.GetFields(System.Reflection.BindingFlags.Instance
                 | System.Reflection.BindingFlags.NonPublic
                 | System.Reflection.BindingFlags.Public
-                | System.Reflection.BindingFlags.DeclaredOnly
-                | System.Reflection.BindingFlags.GetProperty);
+                | System.Reflection.BindingFlags.DeclaredOnly);
 
-            if (properties == null || properties.Length == 0)
+            if (fields == null || fields.Length == 0)
                 return null;
+
+            if ((context as UIViewController) == null && container == null)
+                throw new InvalidOperationException("You can't get widgets out of a UIViewControllore or a UIView");            
 
             List<UIView> views = new List<UIView>();
 
             //bool isWidgetAttributeUsed = false;
-            foreach (var property in properties)
+            foreach (var field in fields)
             {
-                var attributes = property.GetCustomAttributes(typeof(OutletAttribute), false);
+                var attributes = field.GetCustomAttributes(typeof(WidgetAttribute), false);
                 if (attributes == null || attributes.Length == 0)
                     continue;
 
                 //isWidgetAttributeUsed = true;
 
-                Type fieldType = property.PropertyType;
-                UIView view = property.GetValue(context) as UIView;
+                string id = field.Name;
+                UIView view = (container != null) ? container.FindViewById<UIView>(id) : ((UIViewController)context).View.FindViewById<UIView>(id);
+                field.SetValue(context, view);
 
                 views.Add(view);
             }
