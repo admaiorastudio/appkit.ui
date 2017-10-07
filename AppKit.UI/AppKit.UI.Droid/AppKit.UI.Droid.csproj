@@ -75,7 +75,6 @@
     <Compile Include="Application\AppCompactActivity.cs" />
     <Compile Include="Application\Fragment.cs" />
     <Compile Include="Extensions\BundleExtension.cs" />
-    <Compile Include="Extensions\Cross\ButtonExtension.cs" />
     <Compile Include="Extensions\ImageButtonExtension.cs" />
     <Compile Include="Extensions\ButtonExtension.cs" />
     <Compile Include="Extensions\LayoutInflaterExtension.cs" />

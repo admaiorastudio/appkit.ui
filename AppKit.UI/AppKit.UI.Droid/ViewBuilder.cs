@@ -108,12 +108,10 @@ namespace AdMaiora.AppKit.UI
             return ColorFromARGB(a, r, g, b);
         }
 
-        public static Typeface FontFromAsset(string fontName, bool bold = false)
+        public static Typeface FontFromAsset(string fontName)
         {
             if (_fonts == null)
                 _fonts = new Dictionary<string, Typeface>();
-
-            fontName = String.Concat(fontName, bold ? "-Bold" : "-Regular");
 
             string key = fontName;
             if (_fonts.ContainsKey(key))

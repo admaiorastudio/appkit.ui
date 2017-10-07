@@ -33,6 +33,8 @@
                 else if (v.Subviews.Length != 0)
                 {
                     view = FindView(v, id);
+                    if (view != null)
+                        break;
                 }
             }
 

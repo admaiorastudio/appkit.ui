@@ -47,12 +47,10 @@ namespace AdMaiora.AppKit.UI
             return ColorFromARGB(a, r, g, b);
         }
 
-        public static UIFont FontFromAsset(string fontName, nfloat size, bool bold = false)
+        public static UIFont FontFromAsset(string fontName, nfloat size)
         {
             if (_fonts == null)
                 _fonts = new Dictionary<string, UIFont>();
-
-            fontName = String.Concat(fontName, bold ? "-Bold" : "-Regular");
 
             string key = String.Concat(fontName, "-", size);
             if (_fonts.ContainsKey(key))
