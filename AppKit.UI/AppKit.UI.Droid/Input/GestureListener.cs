@@ -160,7 +160,8 @@ namespace AdMaiora.AppKit.UI
                 WhenDown(args);
                 return args.Handled;
             }
-            return false;
+
+            return false || (WhenSingleTapUp != null);
         }
 
         public override void OnLongPress(MotionEvent e)
@@ -189,6 +190,7 @@ namespace AdMaiora.AppKit.UI
                 WhenSingleTapUp(args);
                 return args.Handled;
             }
+
             return false;
         }
 

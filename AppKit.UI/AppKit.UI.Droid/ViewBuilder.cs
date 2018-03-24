@@ -134,17 +134,17 @@ namespace AdMaiora.AppKit.UI
                 if (view is TextView)
                 {
                     TextView label = view as TextView;
-                    label.SetTypeface(ViewBuilder.FontFromAsset(fontName, label.Typeface.IsBold), label.Typeface.Style);
+                    label.SetTypeface(ViewBuilder.FontFromAsset(fontName), label.Typeface.Style);
                 }
                 else if (view is EditText)
                 {
                     EditText text = view as EditText;
-                    text.SetTypeface(ViewBuilder.FontFromAsset(fontName, text.Typeface.IsBold), text.Typeface.Style);
+                    text.SetTypeface(ViewBuilder.FontFromAsset(fontName), text.Typeface.Style);
                 }
                 else if (view is Button)
                 {
                     Button button = view as Button;
-                    button.SetTypeface(ViewBuilder.FontFromAsset(fontName, button.Typeface.IsBold), button.Typeface.Style);
+                    button.SetTypeface(ViewBuilder.FontFromAsset(fontName), button.Typeface.Style);
                 }
             }
         }

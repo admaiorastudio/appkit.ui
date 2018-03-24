@@ -81,7 +81,13 @@
             }
             else
             {
-                label.Font = ViewBuilder.FontFromAsset(label.Font.Name, label.Font.PointSize, bold);
+                UIFontDescriptor fd = label.Font.FontDescriptor.CreateWithTraits(UIFontDescriptorSymbolicTraits.Bold);
+                if (fd != null)
+                {
+                    UIFont font = UIFont.FromDescriptor(fd, label.Font.PointSize);
+                    if (font != null)                    
+                        label.Font = font;                    
+                }
             }
         }
 
