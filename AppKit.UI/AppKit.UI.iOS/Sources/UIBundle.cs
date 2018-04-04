@@ -95,7 +95,7 @@ namespace AdMaiora.AppKit.UI
         }
         public byte[] GetByteArray(string key)
         {
-            if (!_values.ContainsKey(new NSString(key)))
+            if (!_values.ContainsKey(key))
                 return default(byte[]);
 
             string s = _values[key].ToString();
@@ -132,7 +132,7 @@ namespace AdMaiora.AppKit.UI
         }
         public int[] GetIntArray(string key)
         {
-            if (!_values.ContainsKey(new NSString(key)))
+            if (!_values.ContainsKey(key))
                 return default(int[]);
 
             string s = _values[key].ToString();
@@ -169,7 +169,7 @@ namespace AdMaiora.AppKit.UI
         }
         public long[] GetLongArray(string key)
         {
-            if (!_values.ContainsKey(new NSString(key)))
+            if (!_values.ContainsKey(key))
                 return default(long[]);
 
             string s = _values[key].ToString();
@@ -206,7 +206,7 @@ namespace AdMaiora.AppKit.UI
         }
         public float[] GetFloatArray(string key)
         {
-            if (!_values.ContainsKey(new NSString(key)))
+            if (!_values.ContainsKey(key))
                 return default(float[]);
 
             string s = _values[key].ToString();
@@ -243,7 +243,7 @@ namespace AdMaiora.AppKit.UI
         }
         public double[] GetDoubleArray(string key)
         {
-            if (!_values.ContainsKey(new NSString(key)))
+            if (!_values.ContainsKey(key))
                 return default(double[]);
 
             string s = _values[key].ToString();
